@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FYP</string>
+    <string name="title_activity_joystick_control">JoystickControl</string>
+    <string name="title_activity_voice_control">VoiceControl</string>
+</resources>
