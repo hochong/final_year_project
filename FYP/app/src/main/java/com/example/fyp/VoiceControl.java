@@ -1,6 +1,7 @@
 package com.example.fyp;
 
 import android.content.Intent;
+import android.hardware.Camera;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -11,12 +12,18 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
 
 public class VoiceControl extends AppCompatActivity {
     private boolean MIC_ON = false;
     private boolean AUTO_DETECT_VOICE = false;
+
+    //camera
+    private Camera mCamera;
+    private CameraControlApp.CameraPreview mPreview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +70,14 @@ public class VoiceControl extends AppCompatActivity {
                 }
             }
         });
+        //camera
+        CameraControlApp cca = new CameraControlApp();
+        if (cca.checkCameraHardware(this)){
+            mCamera = cca.getCameraInstance();
+            mPreview = new CameraControlApp.CameraPreview(this, mCamera);
+            FrameLayout preview = (FrameLayout) findViewById(R.id.voice_cameraView);
+            preview.addView(mPreview);
+        }
     }
 
     public void toJoystickControl(View view) {

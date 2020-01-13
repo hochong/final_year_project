@@ -7,10 +7,11 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".JoystickControl"
     tools:showIn="@layout/activity_joystick_control">
-    <View
+    <FrameLayout
+        android:id="@+id/joystick_cameraView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="#C0C0C0"
+        android:layout_weight="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
     <io.github.controlwear.virtual.joystick.android.JoystickView
