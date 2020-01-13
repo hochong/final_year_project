@@ -32,8 +32,14 @@ public class BluetoothConnectionRobotApp {
         //TODO
         //get param
         //wrap up interfaces
+        monitorDiscovery();
+        startDiscovery();
     }
 
+    public void sendtorobot(String message){
+        sendMessage(mBluetoothSocket, message);
+        Log.i(TAG, "message sent: "+ message);
+    }
 
     private void monitorDiscovery() {
         context.registerReceiver(discoveryMonitor,
@@ -71,8 +77,6 @@ public class BluetoothConnectionRobotApp {
 
 
     private void startDiscovery() {
-
-
         mBluetooth = BluetoothAdapter.getDefaultAdapter();
         context.registerReceiver(discoveryResult,
                 new IntentFilter(BluetoothDevice.ACTION_FOUND));
@@ -83,7 +87,8 @@ public class BluetoothConnectionRobotApp {
 
     }
 
-    public void connectToServerSocket(BluetoothDevice device, UUID uuid) {
+    public BluetoothSocket connectToServerSocket(BluetoothDevice device, UUID uuid) {
+        BluetoothSocket returnshocket = null;
         try{
             BluetoothSocket clientSocket
                     = device.createRfcommSocketToServiceRecord(uuid);
@@ -91,13 +96,15 @@ public class BluetoothConnectionRobotApp {
             clientSocket.connect();
 
             // Add a reference to the socket used to send messages.
-            mBluetoothSocket = clientSocket;
-            // Start listening for messages.
-            //TODO;
+            this.mBluetoothSocket = clientSocket;
+            returnshocket = this.mBluetoothSocket;
+
         } catch (IOException e) {
             Log.e(TAG, "Bluetooth client I/O Exception.", e);
         }
+        return returnshocket;
     }
+
 
     private void sendMessage(BluetoothSocket socket, String message) {
         OutputStream outputStream;
@@ -114,6 +121,8 @@ public class BluetoothConnectionRobotApp {
             Log.e(TAG, "Failed to send message: " + message, e);
         }
     }
+
+    /* only send msg to robot but not listening to its response
     private boolean mListening = false;
     private String listenForMessages(BluetoothSocket socket,
                                      StringBuilder incoming) {
@@ -143,5 +152,5 @@ public class BluetoothConnectionRobotApp {
             Log.e(TAG, "Message receive failed.", e);
         }
         return result;
-    }
+    }*/
 }
