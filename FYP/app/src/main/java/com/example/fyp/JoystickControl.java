@@ -20,7 +20,7 @@ public class JoystickControl extends AppCompatActivity {
     //camera
     private Camera mCamera;
     private CameraControlApp.CameraPreview mPreview;
-
+    private BluetoothConnectionRobotApp bcra;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +42,8 @@ public class JoystickControl extends AppCompatActivity {
             }
         });
 
+        Bundle bundle = getIntent().getExtras();
+        bcra = (BluetoothConnectionRobotApp) bundle.get("bluetoothconnection");
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
@@ -50,21 +52,29 @@ public class JoystickControl extends AppCompatActivity {
                 //move forwards 90+-20 activate over 70%
                 if (angle > 70 && angle < 110 && strength >70){
                     Log.i("MainActivity", "move forward");
+                    String msg = bcra.create_protocol_message("00", "01","5E","00","00","00");
+                    bcra.sendtorobot(msg);
                 }
 
                 //move left 180+-20 activate over 70%
                 if (angle > 160 && angle < 200 && strength >70){
                     Log.i("MainActivity", "move left");
+                    String msg = bcra.create_protocol_message("00", "02","00","5E","00","00");
+                    bcra.sendtorobot(msg);
                 }
 
                 //move right 0+-20 activate over 70%
                 if ((angle > 340 || angle < 20) && strength >70){
                     Log.i("MainActivity", "move right");
+                    String msg = bcra.create_protocol_message("00", "04","00","00","5E","00");
+                    bcra.sendtorobot(msg);
                 }
 
                 //move backwards 270+-20 activate over 70%
                 if (angle > 250 && angle < 290 && strength >70){
                     Log.i("MainActivity", "move backward");
+                    String msg = bcra.create_protocol_message("00", "08","00","00","00","5E");
+                    bcra.sendtorobot(msg);
                 }
 
             }

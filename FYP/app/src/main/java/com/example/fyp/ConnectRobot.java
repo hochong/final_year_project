@@ -29,7 +29,7 @@ public class ConnectRobot extends AppCompatActivity {
     private static final int ENABLE_BLUETOOTH = 1;
     private static final int REQUEST_LOC = 2;
     private String TAG = "ConnectRobot";
-    private final String[] bluetoothList = new String[5];
+    private String[] bluetoothList = null;
 
     //recyclerView var
     private RecyclerView recyclerView;
@@ -42,21 +42,26 @@ public class ConnectRobot extends AppCompatActivity {
 
         //TODO
         //connect Bluetooth
+        initBluetooth();
+        BluetoothConnectionRobotApp bcra= new BluetoothConnectionRobotApp(this);
         //temp
-        bluetoothList[0] = "Bluetooth0";
-        bluetoothList[1] = "Bluetooth1";
-        bluetoothList[2] = "Bluetooth2";
-        bluetoothList[3] = "Bluetooth3";
-        bluetoothList[4] = "Bluetooth4";
+        bluetoothList = bcra.getBluetoothList();
+        if (bluetoothList == null) {
+            bluetoothList = new String[5];
+            bluetoothList[0] = "Bluetooth0";
+            bluetoothList[1] = "Bluetooth1";
+            bluetoothList[2] = "Bluetooth2";
+            bluetoothList[3] = "Bluetooth3";
+            bluetoothList[4] = "Bluetooth4";
+        }
+
         //show list of connections in ui
         recyclerView = (RecyclerView) findViewById(R.id.bluetooth_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new ConnectRobot_BluetoothListAdapter(this, bluetoothList);
+        mAdapter = new ConnectRobot_BluetoothListAdapter(this, bluetoothList, bcra);
         recyclerView.setAdapter(mAdapter);
 
-        //set uuid
         //return connection
-
     }
 
     private void initBluetooth(){
@@ -86,8 +91,9 @@ public class ConnectRobot extends AppCompatActivity {
     }
 
 
-
-    private void returnConnection () {
+    @Override
+    protected void onPause() {
+        super.onPause();
 
     }
 }
