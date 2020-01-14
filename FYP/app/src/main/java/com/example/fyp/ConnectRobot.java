@@ -46,7 +46,7 @@ public class ConnectRobot extends AppCompatActivity {
         BluetoothConnectionRobotApp bcra= new BluetoothConnectionRobotApp(this);
         //temp
         bluetoothList = bcra.getBluetoothList();
-        if (bluetoothList == null) {
+        if (bluetoothList.length < 1) {
             bluetoothList = new String[5];
             bluetoothList[0] = "Bluetooth0";
             bluetoothList[1] = "Bluetooth1";
@@ -65,6 +65,10 @@ public class ConnectRobot extends AppCompatActivity {
     }
 
     private void initBluetooth(){
+        //comment out for simulator testing
+        if (mBluetooth == null){
+            return;
+        }
         if (!mBluetooth.isEnabled()) {
             Intent i = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(i, ENABLE_BLUETOOTH);

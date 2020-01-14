@@ -26,7 +26,7 @@ import java.util.UUID;
 public class BluetoothConnectionRobotApp implements Serializable{
     private BluetoothAdapter mBluetooth;
     private List<BluetoothDevice> deviceList = new ArrayList<>();
-    private List<String> deviceListname = new ArrayList<>();
+    private List<String> deviceListname = new ArrayList<String>();
     private String TAG = "BluetoothConnectionRobotApp";
     private BluetoothSocket mBluetoothSocket;
     private Context context;
@@ -36,8 +36,9 @@ public class BluetoothConnectionRobotApp implements Serializable{
         //TODO
         //get param
         //wrap up interfaces
-        monitorDiscovery();
-        startDiscovery();
+        //comment out for simulator testing
+        //monitorDiscovery();
+        //startDiscovery();
 
         uuid = new UUID(0,64);
     }
@@ -47,7 +48,9 @@ public class BluetoothConnectionRobotApp implements Serializable{
     }
 
     public String[] getBluetoothList() {
-        return (String[]) deviceListname.toArray();
+        String[] Arr = new String[deviceListname.size()];
+
+        return (String[]) deviceListname.toArray(Arr);
     }
     public String create_protocol_message(String button, String rockerformat, String rocker1, String rocker2, String rocker3, String rocker4) {
         String header = hextostring("55");
@@ -71,7 +74,7 @@ public class BluetoothConnectionRobotApp implements Serializable{
 
     }
     public void sendtorobot(String message){
-        sendMessage(mBluetoothSocket, message);
+        //sendMessage(mBluetoothSocket, message);
         Log.i(TAG, "message sent: "+ message);
     }
 
