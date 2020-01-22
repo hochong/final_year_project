@@ -56,7 +56,7 @@ public class JoystickControl extends AppCompatActivity {
                 if (angle > 70 && angle < 110 && strength >70){
                     Log.i("MainActivity", "move forward");
                     if (bcra != null) {
-                        String msg = bcra.create_protocol_message("00", "01", "5E", "00", "00", "00");
+                        String msg = bcra.create_protocol_message(00, 02, 00, 255, 00, 00);
                         bcra.sendtorobot(msg);
                     }
                 }
@@ -65,7 +65,7 @@ public class JoystickControl extends AppCompatActivity {
                 if (angle > 160 && angle < 200 && strength >70){
                     Log.i("MainActivity", "move left");
                     if (bcra != null) {
-                        String msg = bcra.create_protocol_message("00", "02","00","5E","00","00");
+                        String msg = bcra.create_protocol_message(00, 01,00,00,00,00);
                         bcra.sendtorobot(msg);
                     }
 
@@ -75,7 +75,7 @@ public class JoystickControl extends AppCompatActivity {
                 if ((angle > 340 || angle < 20) && strength >70){
                     Log.i("MainActivity", "move right");
                     if (bcra != null) {
-                        String msg = bcra.create_protocol_message("00", "04", "00", "00", "5E", "00");
+                        String msg = bcra.create_protocol_message(00, 01, 255, 00, 00, 00);
                         bcra.sendtorobot(msg);
                     }
                 }
@@ -84,7 +84,7 @@ public class JoystickControl extends AppCompatActivity {
                 if (angle > 250 && angle < 290 && strength >70){
                     Log.i("MainActivity", "move backward");
                     if (bcra != null) {
-                        String msg = bcra.create_protocol_message("00", "08", "00", "00", "00", "5E");
+                        String msg = bcra.create_protocol_message(00, 02, 00, 00, 00, 00);
                         bcra.sendtorobot(msg);
                     }
                 }

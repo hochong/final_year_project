@@ -11,10 +11,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.content.ContentValues.TAG;
 
 public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<ConnectRobot_BluetoothListAdapter.MyViewHolder> {
-    private final String[] mRobot_Bluetooth_List;
+    private final ArrayList<String> mRobot_Bluetooth_List;
     private LayoutInflater mInflater;
     private final BluetoothConnectionRobotApp bcra;
 
@@ -34,21 +37,27 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
         public void onClick(View v) {
             int mPosition = getLayoutPosition();
 
-            Log.i(TAG, "Connect to robot activity - bluetooth list adapter - " + this.mAdapter.mRobot_Bluetooth_List[mPosition] + " is clicked");
-            this.bcra.connectToRobotSocket(mPosition);
-            Intent i = new Intent();
-            i.putExtra("bluetoothconnection", this.bcra);
+            Log.i(TAG, "Connect to robot activity - bluetooth list adapter - " + this.mAdapter.mRobot_Bluetooth_List.get(mPosition) + " is clicked");
+            ConnectRobot.connectToRobotSocket(mPosition);
+            //Intent i = new Intent();
+            //i.putExtra("bluetoothconnection", this.bcra);
 
         }
+
     }
 
     // constructor
-    public ConnectRobot_BluetoothListAdapter(Context context, String[] mylist, BluetoothConnectionRobotApp bcra) {
+    public ConnectRobot_BluetoothListAdapter(Context context, ArrayList<String> mylist, BluetoothConnectionRobotApp bcra) {
         mInflater = LayoutInflater.from(context);
        this.mRobot_Bluetooth_List = mylist;
        this.bcra = bcra;
     }
 
+    public void updateData(ArrayList<String> list) {
+        mRobot_Bluetooth_List.clear();
+        mRobot_Bluetooth_List.addAll(list);
+        notifyDataSetChanged();
+    }
     // Create new views (invoked by the layout manager)
     @Override
     public ConnectRobot_BluetoothListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
@@ -59,14 +68,19 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
+       if (mRobot_Bluetooth_List != null){
+            holder.textView.setText(mRobot_Bluetooth_List.get(position));
+       }
 
-       holder.textView.setText(mRobot_Bluetooth_List[position]);
 
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mRobot_Bluetooth_List.length;
+        if (mRobot_Bluetooth_List == null){
+            return 0;
+        }
+        return mRobot_Bluetooth_List.size();
     }
 }
