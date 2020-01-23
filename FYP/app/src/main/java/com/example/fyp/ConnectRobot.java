@@ -9,13 +9,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -40,10 +49,22 @@ public class ConnectRobot extends AppCompatActivity {
 
 
     private BluetoothSocket mBluetoothSocket;
-    private Context context;
-    private UUID uuid;
-    private ArrayList<BluetoothDevice> deviceList = new ArrayList<BluetoothDevice>();
-    private ArrayList<String> deviceListname = new ArrayList<String>();
+    protected ArrayList<BluetoothDevice> deviceList = new ArrayList<BluetoothDevice>();
+    protected ArrayList<String> deviceListname = new ArrayList<String>();
+    BluetoothGatt mBluetoothGatt;
+
+    String serviceUuid[] = {
+            "0000ffe0-0000-1000-8000-00805f9b34fb",
+            "0000dfb0-0000-1000-8000-00805f9b34fb"
+    };
+
+    String characteristicsUuid[] = {
+            "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "0000dfb1-0000-1000-8000-00805f9b34fb"
+    };
+    UUID selectedserviceuuid;
+    UUID selectedcharuuid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,12 +73,17 @@ public class ConnectRobot extends AppCompatActivity {
         //TODO
         //connect Bluetooth
         Log.d(TAG, "new bcra");
-        BluetoothConnectionRobotApp bcra= new BluetoothConnectionRobotApp();
-        //temp
+        BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
+        /*
+        //Bluetooth Classic
         mBluetooth = bcra.getmBluetooth();
         initBluetooth();
         //monitorDiscovery();
         startDiscovery();
+        */
+        //BLowEnergy
+        bleScan();
+
 
         deviceListname.add("test1");
         //show list of connections in ui
@@ -101,6 +127,71 @@ public class ConnectRobot extends AppCompatActivity {
 
     }
 
+    private void bleScan() {
+            mBluetooth.getBluetoothLeScanner().startScan(scanCallBack);
+    }
+
+    private ScanCallback scanCallBack = new ScanCallback() {
+        @Override
+        public void onScanResult (int callbackType, ScanResult result) {
+           BluetoothDevice device = result.getDevice();
+
+        }
+    };
+    private void connectToGattServer(BluetoothDevice device, UUID serviceuuid, UUID charuuid) {
+        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        selectedserviceuuid = serviceuuid;
+        selectedcharuuid = charuuid;
+
+
+        BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
+        bcra.setBTConnectiondevice(device);
+        bcra.setBTConnection(mBluetoothGatt);
+        bcra.setServiceuuid(serviceuuid);
+        bcra.setCharuuid(charuuid);
+    }
+    private final BluetoothGattCallback mGattCallback =
+            new BluetoothGattCallback() {
+                @Override
+                public void onConnectionStateChange(BluetoothGatt gatt,
+                                                    int status, int newState) {
+                    super.onConnectionStateChange(gatt, status, newState);
+                    if (newState == BluetoothProfile.STATE_CONNECTED) {
+                        mBluetoothGatt.discoverServices();
+                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                        Log.d(TAG, "Disconnected from GATT server.");
+                    }
+                }
+                @Override
+                public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                    super.onServicesDiscovered(gatt, status);
+                    for (BluetoothGattService service: gatt.getServices()) {
+                        Log.d(TAG, "Service: " + service.getUuid());
+
+                        for (BluetoothGattCharacteristic characteristic :
+                                service.getCharacteristics()) {
+                            Log.d(TAG, "Value: " + characteristic.getValue());
+                            if (service.getUuid() == UUID.fromString(serviceUuid[0]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[0])){
+                                connectToGattServer(gatt.getDevice(), service.getUuid(), characteristic.getUuid());
+                            }
+                            if (service.getUuid() == UUID.fromString(serviceUuid[1]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[1])){
+                                connectToGattServer(gatt.getDevice(), service.getUuid(), characteristic.getUuid());
+                            }
+                            for (BluetoothGattDescriptor descriptor :
+                                    characteristic.getDescriptors()) {
+                                Log.d(TAG, descriptor.getValue().toString());
+                            }
+                        }
+                    }
+
+                }
+                @Override
+                public void onCharacteristicChanged(BluetoothGatt gatt,
+                                                    BluetoothGattCharacteristic characteristic) {
+                    super.onCharacteristicChanged(gatt, characteristic);
+
+                }
+    };
 
     @Override
     protected void onPause() {
@@ -116,6 +207,7 @@ public class ConnectRobot extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver(discoveryResult);
         unregisterReceiver(discoveryMonitor);
+        mBluetoothGatt.close();
     }
 
     private final BroadcastReceiver discoveryMonitor = new BroadcastReceiver() {
@@ -134,8 +226,8 @@ public class ConnectRobot extends AppCompatActivity {
         }
     };
     private final BroadcastReceiver discoveryResult = new BroadcastReceiver() {
-        private ArrayList<BluetoothDevice> deviceList = new ArrayList<BluetoothDevice>();
-        private ArrayList<String> deviceListname = new ArrayList<String>();
+        //private ArrayList<BluetoothDevice> deviceList = new ArrayList<BluetoothDevice>();
+        //private ArrayList<String> deviceListname = new ArrayList<String>();
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Bluetooth result received ");
@@ -157,6 +249,14 @@ public class ConnectRobot extends AppCompatActivity {
             Log.d(TAG, "deviceListname " + deviceListname);
         }
     };
+
+    private void setNotification(){
+
+        BluetoothGattCharacteristic characteristic;
+        characteristic = mBluetoothGatt.getService(selectedserviceuuid).getCharacteristic(selectedcharuuid);
+        boolean enabled = true;
+        mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+    }
 
     private void monitorDiscovery() {
         this.registerReceiver(discoveryMonitor,

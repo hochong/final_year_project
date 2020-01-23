@@ -1,5 +1,6 @@
 package com.example.fyp;
 
+import android.bluetooth.BluetoothGatt;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.util.UUID;
+
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class JoystickControl extends AppCompatActivity {
@@ -21,6 +24,9 @@ public class JoystickControl extends AppCompatActivity {
     private Camera mCamera;
     private CameraControlApp.CameraPreview mPreview;
     private BluetoothConnectionRobotApp bcra;
+    BluetoothGatt mBluetoothGatt;
+    UUID selectedserviceuuid;
+    UUID selectedcharuuid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +50,11 @@ public class JoystickControl extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
-            bcra = (BluetoothConnectionRobotApp) bundle.get("bluetoothconnection");
+            mBluetoothGatt = (BluetoothGatt) bundle.get("gatt");
+            selectedserviceuuid = (UUID) bundle.get("serviceuuid");
+            selectedcharuuid = (UUID) bundle.get("charuuid");
+            Log.i("MainActivity", "selectedserviceuuid" + selectedserviceuuid.toString());
+            Log.i("MainActivity", "selectedcharuuid" + selectedcharuuid.toString());
         }
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);

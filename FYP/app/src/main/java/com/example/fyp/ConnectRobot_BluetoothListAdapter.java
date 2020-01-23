@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 import static android.content.ContentValues.TAG;
 
@@ -24,13 +24,12 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
     public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView;
         final ConnectRobot_BluetoothListAdapter mAdapter;
-        private final BluetoothConnectionRobotApp bcra;
-        public MyViewHolder(View v, ConnectRobot_BluetoothListAdapter adapter, BluetoothConnectionRobotApp bcra) {
+
+        public MyViewHolder(View v, ConnectRobot_BluetoothListAdapter adapter) {
             super(v);
             textView = v.findViewById(R.id.word);
             this.mAdapter = adapter;
             itemView.setOnClickListener(this);
-            this.bcra = bcra;
         }
 
         @Override
@@ -39,8 +38,7 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
 
             Log.i(TAG, "Connect to robot activity - bluetooth list adapter - " + this.mAdapter.mRobot_Bluetooth_List.get(mPosition) + " is clicked");
             ConnectRobot.connectToRobotSocket(mPosition);
-            //Intent i = new Intent();
-            //i.putExtra("bluetoothconnection", this.bcra);
+
 
         }
 
@@ -62,7 +60,7 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
     @Override
     public ConnectRobot_BluetoothListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
         View mItemView = mInflater.inflate(R.layout.bluetooth_recyclerview_item, parent, false);
-        return new MyViewHolder(mItemView, this, this.bcra);
+        return new MyViewHolder(mItemView, this);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
