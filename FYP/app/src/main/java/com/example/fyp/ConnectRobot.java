@@ -262,9 +262,8 @@ public class ConnectRobot extends AppCompatActivity {
 
         }
         try{//BLE
-
             mBluetoothGatt.close();
-        }catch (IllegalArgumentException exception){
+        }catch (Exception exception){
 
         }
 

@@ -70,7 +70,7 @@ public class JoystickControl extends AppCompatActivity {
                     Log.i("MainActivity", "move forward");
                     if (bcra != null) {
                         String msg = bcra.create_protocol_message(00, 02, 00, 255, 00, 00);
-                        bcra.sendtorobot("55AA110100010000000015");
+                        bcra.sendtorobot("55AA11010201005E00007B");
                         //bcra.sendtorobot(msg);
                     }
                 }
@@ -80,7 +80,8 @@ public class JoystickControl extends AppCompatActivity {
                     Log.i("MainActivity", "move left");
                     if (bcra != null) {
                         String msg = bcra.create_protocol_message(00, 01,00,00,00,00);
-                        bcra.sendtorobot(msg);
+                        bcra.sendtorobot("0x550xAA0x110x010x020x010x000x5E0x000x000x7B");
+                        //bcra.sendtorobot(msg);
                     }
 
                 }
@@ -99,7 +100,16 @@ public class JoystickControl extends AppCompatActivity {
                     Log.i("MainActivity", "move backward");
                     if (bcra != null) {
                         String msg = bcra.create_protocol_message(00, 02, 00, 00, 00, 00);
-                        bcra.sendtorobot(msg);
+                        //bcra.sendtorobot("55AA110002005E000079");
+                        byte [] blist = {(byte)0x55, (byte)0xAA, (byte)0x11, (byte)0x01, (byte)0x02,
+                                (byte)0x01, (byte)0x00, (byte)0x5E, (byte)0x00, (byte)0x00, (byte)0x7B};
+
+
+                        boolean success = bcra.blewriteCharacteristic_byte(blist);
+                        if (success) {
+                            Log.i("MainActivity", "move backward msg success, msg = " + blist.toString());
+                        }
+                        //bcra.sendtorobot(msg);
                     }
                 }
 

@@ -8,7 +8,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
-import java.io.Serializable;
+
 
 import java.util.UUID;
 
@@ -111,13 +111,50 @@ public class BluetoothConnectionRobotApp extends Application {
             return false;
         }
 
-        byte[] value = msg.getBytes();
+        //byte[] value = msg.getBytes();
+        byte[] value = hexStringToByteArray(msg);
         Log.d(TAG, "value" + value);
         charac.setValue(value);
         boolean status = mBluetoothGatt.writeCharacteristic(charac);
         return status;
     }
 
+    public boolean blewriteCharacteristic_byte(byte[] msg){
+
+        //check mBluetoothGatt is available
+        if (mBluetoothGatt == null) {
+            Log.e(TAG, "lost connection");
+            return false;
+        }
+        //BluetoothGattService Service = mBluetoothGatt.getService(selectedserviceuuid);
+        BluetoothGattService Service = mBluetoothGatt.getService(UUID.fromString(serviceUuid[1]));
+        if (Service == null) {
+            Log.e(TAG, "service not found! Wtih service uuid = " + selectedserviceuuid.toString());
+            return false;
+        }
+        //BluetoothGattCharacteristic charac = Service.getCharacteristic(selectedcharuuid);
+        BluetoothGattCharacteristic charac = Service.getCharacteristic(UUID.fromString(characteristicsUuid[1]));
+        if (charac == null) {
+            Log.e(TAG, "char not found!");
+            return false;
+        }
+
+
+        Log.d(TAG, "msg" + msg);
+        charac.setValue(msg);
+        boolean status = mBluetoothGatt.writeCharacteristic(charac);
+        return status;
+    }
+//from stackoverflow
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
+    }
     /* only send msg to robot but not listening to its response
     private boolean mListening = false;
     private String listenForMessages(BluetoothSocket socket,
