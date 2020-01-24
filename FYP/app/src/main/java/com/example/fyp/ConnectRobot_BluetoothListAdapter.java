@@ -38,8 +38,6 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
 
             Log.i(TAG, "Connect to robot activity - bluetooth list adapter - " + this.mAdapter.mRobot_Bluetooth_List.get(mPosition) + " is clicked");
             ConnectRobot.connectToRobotSocket(mPosition);
-
-
         }
 
     }

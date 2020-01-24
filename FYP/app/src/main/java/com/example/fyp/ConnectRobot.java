@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,8 +50,8 @@ public class ConnectRobot extends AppCompatActivity {
 
 
     private BluetoothSocket mBluetoothSocket;
-    protected ArrayList<BluetoothDevice> deviceList = new ArrayList<BluetoothDevice>();
-    protected ArrayList<String> deviceListname = new ArrayList<String>();
+    private ArrayList<BluetoothDevice> deviceList = new ArrayList<BluetoothDevice>();
+    private ArrayList<String> deviceListname = new ArrayList<String>();
     BluetoothGatt mBluetoothGatt;
 
     String serviceUuid[] = {
@@ -74,6 +75,17 @@ public class ConnectRobot extends AppCompatActivity {
         //connect Bluetooth
         Log.d(TAG, "new bcra");
         BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
+
+        deviceListname.add("Searching");
+        //show list of connections in ui
+        recyclerView = (RecyclerView) findViewById(R.id.bluetooth_recyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        crbla = new ConnectRobot_BluetoothListAdapter(this, deviceListname, bcra);
+        mAdapter = crbla;
+        recyclerView.setAdapter(mAdapter);
+        //recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
         /*
         //Bluetooth Classic
         mBluetooth = bcra.getmBluetooth();
@@ -82,25 +94,29 @@ public class ConnectRobot extends AppCompatActivity {
         startDiscovery();
         */
         //BLowEnergy
+
+        mBluetooth = BluetoothAdapter.getDefaultAdapter();
         bleScan();
+    }
+    public void addDeviceList(BluetoothDevice d){
+        deviceList.add(d);
 
-
-        deviceListname.add("test1");
-        //show list of connections in ui
-        recyclerView = (RecyclerView) findViewById(R.id.bluetooth_recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        crbla = new ConnectRobot_BluetoothListAdapter(this, deviceListname, bcra);
-        mAdapter = crbla;
-        recyclerView.setAdapter(mAdapter);
-        //recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        //return connection
+    }
+    public void addDeviceListName(String s) {
+        deviceListname.add(s);
+        crbla.updateData(deviceListname);
+    }
+    public void clearDeviceListName() {
+        deviceListname.clear();
+        deviceList.clear();
+        crbla.updateData(deviceListname);
     }
 
+    public void makeToast(String msg,int i){
+        Toast toast = Toast.makeText(this, msg, i);
+        toast.show();
+    }
     private void initBluetooth(){
-        //comment out for simulator testing
-        if (mBluetooth == null){
-            return;
-        }
         if (!mBluetooth.isEnabled()) {
             Intent i = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(i, ENABLE_BLUETOOTH);
@@ -128,14 +144,40 @@ public class ConnectRobot extends AppCompatActivity {
     }
 
     private void bleScan() {
-            mBluetooth.getBluetoothLeScanner().startScan(scanCallBack);
+        if (!mBluetooth.isEnabled()) {
+            Intent i = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(i, ENABLE_BLUETOOTH);
+        } else {
+            Log.d(TAG, "Bluetooth Started...");
+        }
+        Log.d(TAG, "Bluetooth = " + mBluetooth);
+        Log.d(TAG, "BluetoothScanner = " + mBluetooth.getBluetoothLeScanner());
+        mBluetooth.getBluetoothLeScanner().startScan(scanCallBack);
+
     }
 
     private ScanCallback scanCallBack = new ScanCallback() {
         @Override
         public void onScanResult (int callbackType, ScanResult result) {
            BluetoothDevice device = result.getDevice();
+           //Log.d(TAG, "Discovered = " + device.getName());
+            addDeviceList(device);
+            addDeviceListName(device.getName());
 
+           //Log.d(TAG, "deviceListname = " + deviceListname);
+           if (device.getName() == null){
+               return;
+           }
+           if (device.getName().equalsIgnoreCase("BT05")){
+               try {
+                   connectToGattServer(device, UUID.fromString(serviceUuid[0]), UUID.fromString(characteristicsUuid[0]));
+               } catch (Exception e ){ }
+               /*
+               try{
+               connectToGattServer(device, UUID.fromString(serviceUuid[1]), UUID.fromString(characteristicsUuid[1]));
+               } catch (Exception e) { }
+                */
+           }
         }
     };
     private void connectToGattServer(BluetoothDevice device, UUID serviceuuid, UUID charuuid) {
@@ -149,6 +191,10 @@ public class ConnectRobot extends AppCompatActivity {
         bcra.setBTConnection(mBluetoothGatt);
         bcra.setServiceuuid(serviceuuid);
         bcra.setCharuuid(charuuid);
+
+        Log.d(TAG, "Service: " + serviceuuid);
+        Log.d(TAG, "Char: " + charuuid);
+        makeToast("Connected to robot!", Toast.LENGTH_LONG);
     }
     private final BluetoothGattCallback mGattCallback =
             new BluetoothGattCallback() {
@@ -171,15 +217,18 @@ public class ConnectRobot extends AppCompatActivity {
                         for (BluetoothGattCharacteristic characteristic :
                                 service.getCharacteristics()) {
                             Log.d(TAG, "Value: " + characteristic.getValue());
-                            if (service.getUuid() == UUID.fromString(serviceUuid[0]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[0])){
+                            /*if (service.getUuid() == UUID.fromString(serviceUuid[0]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[0])){
                                 connectToGattServer(gatt.getDevice(), service.getUuid(), characteristic.getUuid());
-                            }
-                            if (service.getUuid() == UUID.fromString(serviceUuid[1]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[1])){
+                            }*/
+                            /*if (service.getUuid() == UUID.fromString(serviceUuid[1]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[1])){
                                 connectToGattServer(gatt.getDevice(), service.getUuid(), characteristic.getUuid());
-                            }
+                            }*/
                             for (BluetoothGattDescriptor descriptor :
                                     characteristic.getDescriptors()) {
-                                Log.d(TAG, descriptor.getValue().toString());
+                                try{
+                                    Log.d(TAG, descriptor.getValue().toString());
+                                }catch (Exception e){ }
+
                             }
                         }
                     }
@@ -205,9 +254,20 @@ public class ConnectRobot extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        unregisterReceiver(discoveryResult);
-        unregisterReceiver(discoveryMonitor);
-        mBluetoothGatt.close();
+        try{//B classic
+            unregisterReceiver(discoveryResult);
+            unregisterReceiver(discoveryMonitor);
+
+        }catch (IllegalArgumentException exception){
+
+        }
+        try{//BLE
+
+            mBluetoothGatt.close();
+        }catch (IllegalArgumentException exception){
+
+        }
+
     }
 
     private final BroadcastReceiver discoveryMonitor = new BroadcastReceiver() {

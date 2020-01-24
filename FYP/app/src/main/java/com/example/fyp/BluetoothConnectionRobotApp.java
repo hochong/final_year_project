@@ -20,6 +20,16 @@ public class BluetoothConnectionRobotApp extends Application {
     UUID selectedcharuuid;
     private String TAG = "BluetoothConnectionRobotApp";
 
+    String serviceUuid[] = {
+            "0000ffe0-0000-1000-8000-00805f9b34fb",
+            "0000dfb0-0000-1000-8000-00805f9b34fb"
+    };
+
+    String characteristicsUuid[] = {
+            "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "0000dfb1-0000-1000-8000-00805f9b34fb"
+    };
+
     public synchronized void setBTConnectiondevice(BluetoothDevice d) {
         device = d;
     }
@@ -30,7 +40,7 @@ public class BluetoothConnectionRobotApp extends Application {
         mBluetoothGatt = gatt;
     }
     public synchronized void setServiceuuid(UUID serviceuuid){
-        selectedcharuuid = serviceuuid;
+        selectedserviceuuid = serviceuuid;
     }
     public synchronized void setCharuuid(UUID charuuid){
         selectedcharuuid = charuuid;
@@ -71,8 +81,13 @@ public class BluetoothConnectionRobotApp extends Application {
 
     }
     public void sendtorobot(String message){
-        blewriteCharacteristic(message);
+        boolean success = blewriteCharacteristic(message);
         Log.i(TAG, "message sent: "+ message);
+        if (success){
+            Log.i(TAG, "message successfully sent!");
+            return;
+        }
+        Log.i(TAG, "message failed!");
     }
 
 
@@ -83,19 +98,21 @@ public class BluetoothConnectionRobotApp extends Application {
             Log.e(TAG, "lost connection");
             return false;
         }
-        BluetoothGattService Service = mBluetoothGatt.getService(selectedserviceuuid);
+        //BluetoothGattService Service = mBluetoothGatt.getService(selectedserviceuuid);
+        BluetoothGattService Service = mBluetoothGatt.getService(UUID.fromString(serviceUuid[1]));
         if (Service == null) {
-            Log.e(TAG, "service not found!");
+            Log.e(TAG, "service not found! Wtih service uuid = " + selectedserviceuuid.toString());
             return false;
         }
-        BluetoothGattCharacteristic charac = Service
-                .getCharacteristic(selectedcharuuid);
+        //BluetoothGattCharacteristic charac = Service.getCharacteristic(selectedcharuuid);
+        BluetoothGattCharacteristic charac = Service.getCharacteristic(UUID.fromString(characteristicsUuid[1]));
         if (charac == null) {
             Log.e(TAG, "char not found!");
             return false;
         }
 
         byte[] value = msg.getBytes();
+        Log.d(TAG, "value" + value);
         charac.setValue(value);
         boolean status = mBluetoothGatt.writeCharacteristic(charac);
         return status;

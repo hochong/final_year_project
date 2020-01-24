@@ -48,6 +48,7 @@ public class JoystickControl extends AppCompatActivity {
             }
         });
 
+        /*
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
             mBluetoothGatt = (BluetoothGatt) bundle.get("gatt");
@@ -56,6 +57,8 @@ public class JoystickControl extends AppCompatActivity {
             Log.i("MainActivity", "selectedserviceuuid" + selectedserviceuuid.toString());
             Log.i("MainActivity", "selectedcharuuid" + selectedcharuuid.toString());
         }
+        */
+        bcra = (BluetoothConnectionRobotApp) getApplication();
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
@@ -67,7 +70,8 @@ public class JoystickControl extends AppCompatActivity {
                     Log.i("MainActivity", "move forward");
                     if (bcra != null) {
                         String msg = bcra.create_protocol_message(00, 02, 00, 255, 00, 00);
-                        bcra.sendtorobot(msg);
+                        bcra.sendtorobot("55AA110100010000000015");
+                        //bcra.sendtorobot(msg);
                     }
                 }
 
