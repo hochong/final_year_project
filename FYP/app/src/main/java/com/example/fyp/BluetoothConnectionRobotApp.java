@@ -63,7 +63,7 @@ public class BluetoothConnectionRobotApp extends Application {
     }
     public String hextostring(int value) {
         String twohex = Integer.toHexString(value);
-       if (value > 0x0f){
+       if (value < 0x0f){
            return "0" + twohex;
        }
 
