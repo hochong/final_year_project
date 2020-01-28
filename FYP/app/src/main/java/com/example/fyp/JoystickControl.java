@@ -13,8 +13,12 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.UUID;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
@@ -27,6 +31,8 @@ public class JoystickControl extends AppCompatActivity {
     BluetoothGatt mBluetoothGatt;
     UUID selectedserviceuuid;
     UUID selectedcharuuid;
+    private static final int PORT = 9020;
+    private ServerSocket listener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +126,7 @@ public class JoystickControl extends AppCompatActivity {
         CameraControlApp cca = new CameraControlApp();
         if (cca.checkCameraHardware(this)){
             mCamera = cca.getCameraInstance();
+            mCamera.setDisplayOrientation(90);
             mPreview = new CameraControlApp.CameraPreview(this, mCamera);
             FrameLayout preview = (FrameLayout) findViewById(R.id.joystick_cameraView);
             preview.addView(mPreview);
@@ -128,11 +135,54 @@ public class JoystickControl extends AppCompatActivity {
     }
 
     public void connectToOtherPhones(View view) {
+
+        try {
+            listener = new ServerSocket(PORT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try{
+            //setup socket
+            Socket s = listener.accept();
+
+            //button showing ip and port
+            Button b = findViewById(R.id.connect_to_other_phone_button);
+            b.setText(s.getInetAddress().getHostAddress() + " " + Integer.toString(PORT));
+
+            //start thread
+            new otherPhonesHandler(s, bcra).start();
+
+        } catch (Exception e) {
+            try {
+                listener.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }finally {
+            try {
+                listener.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
     }
 
 
     public void toVoiceControl(View view) {
         Intent i = new Intent(this, VoiceControl.class);
         startActivity(i);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            listener.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
