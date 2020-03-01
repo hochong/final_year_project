@@ -54,16 +54,6 @@ public class JoystickControl extends AppCompatActivity {
             }
         });
 
-        /*
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null){
-            mBluetoothGatt = (BluetoothGatt) bundle.get("gatt");
-            selectedserviceuuid = (UUID) bundle.get("serviceuuid");
-            selectedcharuuid = (UUID) bundle.get("charuuid");
-            Log.i("MainActivity", "selectedserviceuuid" + selectedserviceuuid.toString());
-            Log.i("MainActivity", "selectedcharuuid" + selectedcharuuid.toString());
-        }
-        */
         bcra = (BluetoothConnectionRobotApp) getApplication();
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
@@ -107,10 +97,19 @@ public class JoystickControl extends AppCompatActivity {
                     if (bcra != null) {
                         String msg = bcra.create_protocol_message(00, 02, 00, 00, 00, 00);
                         //bcra.sendtorobot("55AA110002005E000079");
-                        byte [] blist = {(byte)0x55, (byte)0xAA, (byte)0x11, (byte)0x01, (byte)0x02,
-                                (byte)0x01, (byte)0x00, (byte)0x5E, (byte)0x00, (byte)0x00, (byte)0x7B};
-
-
+                        byte[] blist = {
+                                0x55,
+                                (byte)0xAA,
+                                0x11,
+                                0x01, // 1 button pressed
+                                0x02,
+                                0x01, // it is button 1
+                                0x00, // joystick y
+                                0x5E, // joystick x
+                                0x00, // unuse
+                                0x00, // unuse
+                                0x7B // checksum
+                        };
                         boolean success = bcra.blewriteCharacteristic_byte(blist);
                         if (success) {
                             Log.i("MainActivity", "move backward msg success, msg = " + blist.toString());

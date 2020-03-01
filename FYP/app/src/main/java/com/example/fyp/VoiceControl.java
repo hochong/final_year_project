@@ -1,6 +1,8 @@
 package com.example.fyp;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -10,6 +12,8 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -46,7 +50,14 @@ public class VoiceControl extends AppCompatActivity {
 
         sr = SpeechRecognizer.createSpeechRecognizer(this);
 
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    1);
+        }
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +111,8 @@ public class VoiceControl extends AppCompatActivity {
     private void startListening () {
         srIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         srIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        srIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, instruction);
+        //srIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, instruction);
+        sr.startListening(srIntent);
         startActivityForResult(srIntent, SpeechRecognizerInt);
     }
 

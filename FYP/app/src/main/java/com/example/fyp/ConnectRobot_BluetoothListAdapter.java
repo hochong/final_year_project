@@ -67,8 +67,6 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
        if (mRobot_Bluetooth_List != null){
             holder.textView.setText(mRobot_Bluetooth_List.get(position));
        }
-
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)

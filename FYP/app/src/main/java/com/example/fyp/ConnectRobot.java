@@ -162,15 +162,22 @@ public class ConnectRobot extends AppCompatActivity {
            BluetoothDevice device = result.getDevice();
            //Log.d(TAG, "Discovered = " + device.getName());
             addDeviceList(device);
-            addDeviceListName(device.getName());
+            String devname = "";
+            if (device.getName() == null){
+                devname = "unknown bluetooth device";
+            }
+            addDeviceListName(devname);
+            BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
 
-           //Log.d(TAG, "deviceListname = " + deviceListname);
            if (device.getName() == null){
                return;
            }
            if (device.getName().equalsIgnoreCase("BT05")){
                try {
-                   connectToGattServer(device, UUID.fromString(serviceUuid[0]), UUID.fromString(characteristicsUuid[0]));
+                   bcra.connectToGattServer(device, UUID.fromString(serviceUuid[0]), UUID.fromString(characteristicsUuid[0]));
+                   if (mBluetooth != null) {
+                       mBluetooth.cancelDiscovery();
+                   }
                } catch (Exception e ){ }
                /*
                try{
@@ -180,67 +187,8 @@ public class ConnectRobot extends AppCompatActivity {
            }
         }
     };
-    private void connectToGattServer(BluetoothDevice device, UUID serviceuuid, UUID charuuid) {
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        selectedserviceuuid = serviceuuid;
-        selectedcharuuid = charuuid;
 
 
-        BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
-        bcra.setBTConnectiondevice(device);
-        bcra.setBTConnection(mBluetoothGatt);
-        bcra.setServiceuuid(serviceuuid);
-        bcra.setCharuuid(charuuid);
-
-        Log.d(TAG, "Service: " + serviceuuid);
-        Log.d(TAG, "Char: " + charuuid);
-        makeToast("Connected to robot!", Toast.LENGTH_LONG);
-    }
-    private final BluetoothGattCallback mGattCallback =
-            new BluetoothGattCallback() {
-                @Override
-                public void onConnectionStateChange(BluetoothGatt gatt,
-                                                    int status, int newState) {
-                    super.onConnectionStateChange(gatt, status, newState);
-                    if (newState == BluetoothProfile.STATE_CONNECTED) {
-                        mBluetoothGatt.discoverServices();
-                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                        Log.d(TAG, "Disconnected from GATT server.");
-                    }
-                }
-                @Override
-                public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                    super.onServicesDiscovered(gatt, status);
-                    for (BluetoothGattService service: gatt.getServices()) {
-                        Log.d(TAG, "Service: " + service.getUuid());
-
-                        for (BluetoothGattCharacteristic characteristic :
-                                service.getCharacteristics()) {
-                            Log.d(TAG, "Value: " + characteristic.getValue());
-                            /*if (service.getUuid() == UUID.fromString(serviceUuid[0]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[0])){
-                                connectToGattServer(gatt.getDevice(), service.getUuid(), characteristic.getUuid());
-                            }*/
-                            /*if (service.getUuid() == UUID.fromString(serviceUuid[1]) && characteristic.getUuid() == UUID.fromString(characteristicsUuid[1])){
-                                connectToGattServer(gatt.getDevice(), service.getUuid(), characteristic.getUuid());
-                            }*/
-                            for (BluetoothGattDescriptor descriptor :
-                                    characteristic.getDescriptors()) {
-                                try{
-                                    Log.d(TAG, descriptor.getValue().toString());
-                                }catch (Exception e){ }
-
-                            }
-                        }
-                    }
-
-                }
-                @Override
-                public void onCharacteristicChanged(BluetoothGatt gatt,
-                                                    BluetoothGattCharacteristic characteristic) {
-                    super.onCharacteristicChanged(gatt, characteristic);
-
-                }
-    };
 
     @Override
     protected void onPause() {
@@ -261,11 +209,7 @@ public class ConnectRobot extends AppCompatActivity {
         }catch (IllegalArgumentException exception){
 
         }
-        try{//BLE
-            mBluetoothGatt.close();
-        }catch (Exception exception){
 
-        }
 
     }
 
@@ -309,13 +253,7 @@ public class ConnectRobot extends AppCompatActivity {
         }
     };
 
-    private void setNotification(){
 
-        BluetoothGattCharacteristic characteristic;
-        characteristic = mBluetoothGatt.getService(selectedserviceuuid).getCharacteristic(selectedcharuuid);
-        boolean enabled = true;
-        mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-    }
 
     private void monitorDiscovery() {
         this.registerReceiver(discoveryMonitor,
