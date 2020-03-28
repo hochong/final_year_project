@@ -12,7 +12,7 @@ import java.io.IOException;
 public class CameraControlApp {
 
     public boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)){
             return true;
         }else{
             return false;

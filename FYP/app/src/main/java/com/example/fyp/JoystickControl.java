@@ -16,6 +16,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -23,16 +27,22 @@ import java.util.UUID;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
-public class JoystickControl extends AppCompatActivity {
+public class JoystickControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
+    private static final String TAG = "JoystickControl";
+    //openCV camera
+    private CameraBridgeViewBase mOpenCvCameraView;
+
     //camera
-    private Camera mCamera;
-    private CameraControlApp.CameraPreview mPreview;
+    //private Camera mCamera;
+    //private CameraControlApp.CameraPreview mPreview;
+
     private BluetoothConnectionRobotApp bcra;
     BluetoothGatt mBluetoothGatt;
     UUID selectedserviceuuid;
     UUID selectedcharuuid;
     private static final int PORT = 9020;
     private ServerSocket listener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,16 +130,23 @@ public class JoystickControl extends AppCompatActivity {
 
             }
         });
-
+        //openCV camera
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.joystick_cameraView);
+        mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
+        if (mOpenCvCameraView != null) {
+            mOpenCvCameraView.enableView();
+            Log.i(TAG,"Camera Start!");
+        }
         //camera
-        CameraControlApp cca = new CameraControlApp();
+        /*CameraControlApp cca = new CameraControlApp();
         if (cca.checkCameraHardware(this)){
             mCamera = cca.getCameraInstance();
             mCamera.setDisplayOrientation(90);
             mPreview = new CameraControlApp.CameraPreview(this, mCamera);
             FrameLayout preview = (FrameLayout) findViewById(R.id.joystick_cameraView);
             preview.addView(mPreview);
-        }
+        }*/
 
     }
 
@@ -183,5 +200,20 @@ public class JoystickControl extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+        Log.i(TAG,"openCV joystick camera started!");
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        return bcra.processFrame(inputFrame);
     }
 }

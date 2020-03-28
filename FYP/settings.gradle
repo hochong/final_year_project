@@ -1,2 +1,3 @@
 include ':app', ':virtualjoystick'
 rootProject.name='FYP'
+include ':openCVLibrary343'

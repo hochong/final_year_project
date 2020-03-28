@@ -10,10 +10,26 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.util.Log;
 import android.widget.Toast;
 
 
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.dnn.Dnn;
+import org.opencv.dnn.Net;
+import org.opencv.imgproc.Imgproc;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.UUID;
 
 public class BluetoothConnectionRobotApp extends Application {
@@ -22,8 +38,8 @@ public class BluetoothConnectionRobotApp extends Application {
     BluetoothGatt mBluetoothGatt;
     UUID selectedserviceuuid;
     UUID selectedcharuuid;
-    private String TAG = "BluetoothConnectionRobotApp";
-
+    private String TAG = "BCRA";
+    private Net net = null;
     String serviceUuid[] = {
             "0000ffe0-0000-1000-8000-00805f9b34fb",
             "0000dfb0-0000-1000-8000-00805f9b34fb"
@@ -33,7 +49,20 @@ public class BluetoothConnectionRobotApp extends Application {
             "0000ffe1-0000-1000-8000-00805f9b34fb",
             "0000dfb1-0000-1000-8000-00805f9b34fb"
     };
-
+    private static final String[] classNames = {"background",
+            "aeroplane", "bicycle", "bird", "boat",
+            "bottle", "bus", "car", "cat", "chair",
+            "cow", "diningtable", "dog", "horse",
+            "motorbike", "person", "pottedplant",
+            "sheep", "sofa", "train", "tvmonitor"};
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            Log.i("BCRA", "OpenCV failed to load");
+        }
+        else {
+            Log.i("BCRA", "OpenCV loaded successfully");
+        }
+    }
     public synchronized void setBTConnectiondevice(BluetoothDevice d) {
         device = d;
     }
@@ -53,8 +82,79 @@ public class BluetoothConnectionRobotApp extends Application {
         return mBluetooth;
     }
 
+    public Boolean loadOpenCVNet(){
 
+            String proto = getPath("MobileNetSSD_deploy.prototxt", this);
+            String weights = getPath("MobileNetSSD_deploy.caffemodel", this);
+            if (proto == "" || weights == "") {
+                return false;
+            }
+            net = Dnn.readNetFromCaffe(proto, weights);
+            Log.i(TAG, "Network loaded");
+            return true;
 
+    }
+
+    public Mat processFrame (CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Boolean loadNet = false;
+        if (net == null) {
+            loadNet = loadOpenCVNet();
+        } else{
+            loadNet = true;
+        }
+        final int IN_WIDTH = 300;
+        final int IN_HEIGHT = 300;
+        //final float WH_RATIO = (float) IN_WIDTH/IN_HEIGHT;
+        final double IN_SCALE_FACTOR = 0.007843;
+        final double MEAN_VAL = 127.5;
+        final double THRESHOLD = 0.1;
+
+        //new frame
+        Mat frame = inputFrame.rgba();
+        Imgproc.cvtColor(frame,frame, Imgproc.COLOR_RGBA2RGB);
+        if (!loadNet){
+            return frame;
+        }
+
+        //forward image to network
+        Mat blob = Dnn.blobFromImage(frame, IN_SCALE_FACTOR,
+                new Size(IN_WIDTH,IN_HEIGHT),
+                new Scalar(MEAN_VAL,MEAN_VAL, MEAN_VAL),
+                false, false);
+        net.setInput(blob);
+        Mat detections = net.forward();
+        int cols = frame.cols();
+        int rows = frame.rows();
+        detections = detections.reshape(1, (int)detections.total()/7);
+        for (int i = 0; i < detections.rows(); i++){
+            double confidence = detections.get (i, 2)[0];
+            if (confidence > THRESHOLD) {
+                int classId = (int) detections.get(i, 1)[0];
+                int left = (int)(detections.get (i,3)[0] * cols);
+                int right = (int) (detections.get(i,4)[0] * rows);
+                int top = (int) (detections.get(i,5)[0] * cols);
+                int bottom = (int)(detections.get(i,6)[0] * rows);
+
+                //draw rect around dtected obj
+                Imgproc.rectangle(frame,
+                        new Point(left,top),
+                        new Point(right,bottom),
+                        /*color*/new Scalar(0,255,0));
+                String label = classNames[classId] + ": "+confidence;
+                int[] baseLine = new int[1];
+                Size labelSize = Imgproc.getTextSize(label, Core.FONT_HERSHEY_SIMPLEX,0.5,1,baseLine);
+
+                //draw background for label
+                Imgproc.rectangle(frame, new Point(left, top - labelSize.height), new Point(left + labelSize.width, top+baseLine[0]),new Scalar(255,255,255), 1);
+
+                //write class name and conf
+                Imgproc.putText(frame,label, new Point(left,top), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0,0,0));
+                //output log
+                Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label);
+            }
+        }
+        return frame;
+    }
     public String create_protocol_message(int button, int rockerformat, int rocker1, int rocker2, int rocker3, int rocker4) {
         String header = hextostring(0x55);
         String headerempty = hextostring(0xAA);
@@ -236,6 +336,27 @@ public class BluetoothConnectionRobotApp extends Application {
 
                 }
             };
+
+    private static String getPath(String f, Context c){
+        AssetManager am = c.getAssets();
+        BufferedInputStream inputStream = null;
+        try{
+            inputStream = new BufferedInputStream(am.open(f));
+            byte[] data = new byte[inputStream.available()];
+            inputStream.read(data);
+            inputStream.close();
+
+            File outFile = new File(c.getFilesDir(),f);
+            FileOutputStream os = new FileOutputStream(outFile);
+            os.write(data);
+            os.close();
+
+            return outFile.getAbsolutePath();
+        }catch (Exception e) {
+            Log.i("BCRA", "Failed to getpath, read and write " + e);
+        }
+        return "";
+    }
     /* only send msg to robot but not listening to its response
     private boolean mListening = false;
     private String listenForMessages(BluetoothSocket socket,

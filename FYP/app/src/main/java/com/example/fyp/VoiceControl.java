@@ -24,19 +24,26 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
 
-public class VoiceControl extends AppCompatActivity {
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.Mat;
+
+public class VoiceControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+    private static final String TAG = "VoiceControl";
+    //openCV camera
+    private CameraBridgeViewBase mOpenCvCameraView;
     private boolean MIC_ON = false;
     private boolean AUTO_DETECT_VOICE = false;
 
     //camera
-    private Camera mCamera;
-    private CameraControlApp.CameraPreview mPreview;
-
+    //private Camera mCamera;
+    //private CameraControlApp.CameraPreview mPreview;
+    private BluetoothConnectionRobotApp bcra;
     //speech
     private SpeechRecognizer sr;
     private Intent srIntent;
     private String instruction = "forward, backward, left, right, stop";
     private int SpeechRecognizerInt = 3000;
+    private ImageView mic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +51,7 @@ public class VoiceControl extends AppCompatActivity {
         setContentView(R.layout.activity_voice_control);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ImageView mic = findViewById(R.id.mic);
+        ImageView mic = findViewById(R.id.micImg);
         FloatingActionButton fab = findViewById(R.id.fab);
         Switch auto_voice_detection = findViewById(R.id.auto_voice_detection);
 
@@ -72,7 +79,9 @@ public class VoiceControl extends AppCompatActivity {
             }
         });
 
+        bcra = (BluetoothConnectionRobotApp) getApplication();
 
+        //mic
         set_mic_image(MIC_ON);
         mic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,8 +90,9 @@ public class VoiceControl extends AppCompatActivity {
                 set_mic_image(MIC_ON);
                 startListening();
             }
+
         });
-        auto_voice_detection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+        /*auto_voice_detection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -97,8 +107,17 @@ public class VoiceControl extends AppCompatActivity {
                     //turn off
                 }
             }
-        });
-        //camera
+        });*/
+        //openCV camera
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.voice_cameraView);
+        mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
+        if (mOpenCvCameraView != null) {
+            mOpenCvCameraView.enableView();
+            Log.i(TAG,"Camera Start!");
+        }
+
+        /*camera
         CameraControlApp cca = new CameraControlApp();
         if (cca.checkCameraHardware(this)){
             mCamera = cca.getCameraInstance();
@@ -106,7 +125,7 @@ public class VoiceControl extends AppCompatActivity {
             mPreview = new CameraControlApp.CameraPreview(this, mCamera);
             FrameLayout preview = (FrameLayout) findViewById(R.id.voice_cameraView);
             preview.addView(mPreview);
-        }
+        }*/
     }
     private void startListening () {
         srIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -141,6 +160,8 @@ public class VoiceControl extends AppCompatActivity {
                         break;
                 }
             }
+            MIC_ON = !MIC_ON;
+            set_mic_image(MIC_ON);
         }
     }
 
@@ -149,11 +170,26 @@ public class VoiceControl extends AppCompatActivity {
         startActivity(i);
     }
     private void set_mic_image(boolean onoff) {
-        ImageView mic = findViewById(R.id.mic);
-        if (MIC_ON) {
+        if (onoff) {
             mic.setImageResource(R.drawable.ic_mic_on_press);
         } else{
             mic.setImageResource(R.drawable.ic_mic_on);
         }
+    }
+
+
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+        Log.i(TAG,"openCV voice camera started!");
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        return bcra.processFrame(inputFrame);
     }
 }
