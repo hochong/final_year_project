@@ -5,13 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".JoystickControl"
-    tools:showIn="@layout/activity_joystick_control">
+    tools:context=".fyp001_JoystickControl"
+    tools:showIn="@layout/fyp001_activity_joystick_control">
+
     <org.opencv.android.JavaCamera2View
         android:id="@+id/joystick_cameraView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"/>
+        android:visibility="visible" />
     <io.github.controlwear.virtual.joystick.android.JoystickView
         android:id="@+id/joystickView"
         android:layout_width="wrap_content"

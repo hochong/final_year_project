@@ -10,11 +10,6 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -23,8 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -33,16 +26,15 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-public class ConnectRobot extends AppCompatActivity {
+public class fyp001_ConnectRobot extends AppCompatActivity {
     private BluetoothAdapter mBluetooth;
     private static final int ENABLE_BLUETOOTH = 1;
     private static final int REQUEST_LOC = 2;
     private String TAG = "ConnectRobot";
     private String[] bluetoothList = null;
-    private ConnectRobot_BluetoothListAdapter crbla;
+    private fyp001_ConnectRobot_BluetoothListAdapter crbla;
 
     //recyclerView var
     private RecyclerView recyclerView;
@@ -69,18 +61,18 @@ public class ConnectRobot extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connect_robot);
+        setContentView(R.layout.fyp001_activity_connect_robot);
 
         //TODO
         //connect Bluetooth
         Log.d(TAG, "new bcra");
-        BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
+        fyp001_BluetoothConnectionRobotApp bcra = (fyp001_BluetoothConnectionRobotApp) getApplication();
 
         deviceListname.add("Searching");
         //show list of connections in ui
         recyclerView = (RecyclerView) findViewById(R.id.bluetooth_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        crbla = new ConnectRobot_BluetoothListAdapter(this, deviceListname, bcra);
+        crbla = new fyp001_ConnectRobot_BluetoothListAdapter(this, deviceListname, bcra);
         mAdapter = crbla;
         recyclerView.setAdapter(mAdapter);
         //recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -167,7 +159,7 @@ public class ConnectRobot extends AppCompatActivity {
                 devname = "unknown bluetooth device";
             }
             addDeviceListName(devname);
-            BluetoothConnectionRobotApp bcra = (BluetoothConnectionRobotApp) getApplication();
+            fyp001_BluetoothConnectionRobotApp bcra = (fyp001_BluetoothConnectionRobotApp) getApplication();
 
            if (device.getName() == null){
                return;

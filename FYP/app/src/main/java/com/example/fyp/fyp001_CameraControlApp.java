@@ -9,7 +9,7 @@ import android.view.SurfaceView;
 
 import java.io.IOException;
 
-public class CameraControlApp {
+public class fyp001_CameraControlApp {
 
     public boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)){

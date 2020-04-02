@@ -19,6 +19,7 @@ import android.widget.Toast;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -32,7 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
-public class BluetoothConnectionRobotApp extends Application {
+public class fyp001_BluetoothConnectionRobotApp extends Application {
     private BluetoothAdapter mBluetooth;
     BluetoothDevice device;
     BluetoothGatt mBluetoothGatt;
@@ -55,6 +56,42 @@ public class BluetoothConnectionRobotApp extends Application {
             "cow", "diningtable", "dog", "horse",
             "motorbike", "person", "pottedplant",
             "sheep", "sofa", "train", "tvmonitor"};
+    private static final byte[] forward_byte_array = {
+            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
+            0x01, // it is button 1
+            0x5E, // joystick y
+            0x00, // joystick x
+            0x00, // unuse
+            0x00, // unuse
+            0x7B // checksum
+    };
+    private static final byte[] backward_byte_array = {
+            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
+            0x01, // it is button 1
+            0x00, // joystick y
+            0x00, // joystick x
+            0x00, // unuse
+            0x00, // unuse
+            0x1C // checksum
+    };
+    private static final byte[] left_byte_array = {
+            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
+            0x01, // it is button 1
+            0x00, // joystick y
+            0x00, // joystick x
+            0x00, // unuse
+            0x00, // unuse
+            0x1C // checksum
+    };
+    private static final byte[] right_byte_array = {
+            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
+            0x01, // it is button 1
+            0x00, // joystick y
+            0x5E, // joystick x
+            0x00, // unuse
+            0x00, // unuse
+            0x7B // checksum
+    };
     static {
         if (!OpenCVLoader.initDebug()) {
             Log.i("BCRA", "OpenCV failed to load");
@@ -81,6 +118,11 @@ public class BluetoothConnectionRobotApp extends Application {
     public BluetoothAdapter getmBluetooth() {
         return mBluetooth;
     }
+    public byte[] get_forward_byte_array() {return forward_byte_array;}
+    public byte[] get_backward_byte_array() {return backward_byte_array;}
+    public byte[] get_left_byte_array() {return left_byte_array;}
+    public byte[] get_right_byte_array() {return right_byte_array;}
+
 
     public Boolean loadOpenCVNet(){
 
@@ -134,13 +176,13 @@ public class BluetoothConnectionRobotApp extends Application {
                 int right = (int) (detections.get(i,4)[0] * rows);
                 int top = (int) (detections.get(i,5)[0] * cols);
                 int bottom = (int)(detections.get(i,6)[0] * rows);
-
+                String label = classNames[classId] + ": "+confidence;
+                /*
                 //draw rect around dtected obj
                 Imgproc.rectangle(frame,
                         new Point(left,top),
                         new Point(right,bottom),
-                        /*color*/new Scalar(0,255,0));
-                String label = classNames[classId] + ": "+confidence;
+                        new Scalar(0,255,0));
                 int[] baseLine = new int[1];
                 Size labelSize = Imgproc.getTextSize(label, Core.FONT_HERSHEY_SIMPLEX,0.5,1,baseLine);
 
@@ -149,13 +191,17 @@ public class BluetoothConnectionRobotApp extends Application {
 
                 //write class name and conf
                 Imgproc.putText(frame,label, new Point(left,top), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0,0,0));
+                */
                 //output log
                 Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label);
+                //TODO: avoid obj if it is in the center with conf > 0.5
+                //TODO: rotate if person found with conf > 0.5
             }
         }
+
         return frame;
     }
-    public String create_protocol_message(int button, int rockerformat, int rocker1, int rocker2, int rocker3, int rocker4) {
+    /*public String create_protocol_message(int button, int rockerformat, int rocker1, int rocker2, int rocker3, int rocker4) {
         String header = hextostring(0x55);
         String headerempty = hextostring(0xAA);
         String address = hextostring(0x11);
@@ -182,46 +228,7 @@ public class BluetoothConnectionRobotApp extends Application {
        }
 
         return twohex;
-
-    }
-    public void sendtorobot(String message){
-        boolean success = blewriteCharacteristic(message);
-        Log.i(TAG, "message sent: "+ message);
-        if (success){
-            Log.i(TAG, "message successfully sent!");
-            return;
-        }
-        Log.i(TAG, "message failed!");
-    }
-
-
-    public boolean blewriteCharacteristic(String msg){
-
-        //check mBluetoothGatt is available
-        if (mBluetoothGatt == null) {
-            Log.e(TAG, "lost connection");
-            return false;
-        }
-        //BluetoothGattService Service = mBluetoothGatt.getService(selectedserviceuuid);
-        BluetoothGattService Service = mBluetoothGatt.getService(UUID.fromString(serviceUuid[1]));
-        if (Service == null) {
-            Log.e(TAG, "service not found! Wtih service uuid = " + selectedserviceuuid.toString());
-            return false;
-        }
-        //BluetoothGattCharacteristic charac = Service.getCharacteristic(selectedcharuuid);
-        BluetoothGattCharacteristic charac = Service.getCharacteristic(UUID.fromString(characteristicsUuid[1]));
-        if (charac == null) {
-            Log.e(TAG, "char not found!");
-            return false;
-        }
-
-        //byte[] value = msg.getBytes();
-        byte[] value = hexStringToByteArray(msg);
-        Log.d(TAG, "value" + value);
-        charac.setValue(value);
-        boolean status = mBluetoothGatt.writeCharacteristic(charac);
-        return status;
-    }
+    }*/
 
     public boolean blewriteCharacteristic_byte(byte[] msg){
 
@@ -254,16 +261,7 @@ public class BluetoothConnectionRobotApp extends Application {
         boolean status = mBluetoothGatt.writeCharacteristic(charac);
         return status;
     }
-//from stackoverflow
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
+
     public void connectToGattServer(BluetoothDevice device, UUID serviceuuid, UUID charuuid) {
         this.mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
         this.selectedserviceuuid = serviceuuid;

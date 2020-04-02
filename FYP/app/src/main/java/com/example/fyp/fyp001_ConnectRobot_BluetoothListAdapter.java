@@ -1,7 +1,6 @@
 package com.example.fyp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,16 +15,16 @@ import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
 
-public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<ConnectRobot_BluetoothListAdapter.MyViewHolder> {
+public class fyp001_ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<fyp001_ConnectRobot_BluetoothListAdapter.MyViewHolder> {
     private final ArrayList<String> mRobot_Bluetooth_List;
     private LayoutInflater mInflater;
-    private final BluetoothConnectionRobotApp bcra;
+    private final fyp001_BluetoothConnectionRobotApp bcra;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView;
-        final ConnectRobot_BluetoothListAdapter mAdapter;
+        final fyp001_ConnectRobot_BluetoothListAdapter mAdapter;
 
-        public MyViewHolder(View v, ConnectRobot_BluetoothListAdapter adapter) {
+        public MyViewHolder(View v, fyp001_ConnectRobot_BluetoothListAdapter adapter) {
             super(v);
             textView = v.findViewById(R.id.word);
             this.mAdapter = adapter;
@@ -37,13 +36,13 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
             int mPosition = getLayoutPosition();
 
             Log.i(TAG, "Connect to robot activity - bluetooth list adapter - " + this.mAdapter.mRobot_Bluetooth_List.get(mPosition) + " is clicked");
-            ConnectRobot.connectToRobotSocket(mPosition);
+            fyp001_ConnectRobot.connectToRobotSocket(mPosition);
         }
 
     }
 
     // constructor
-    public ConnectRobot_BluetoothListAdapter(Context context, ArrayList<String> mylist, BluetoothConnectionRobotApp bcra) {
+    public fyp001_ConnectRobot_BluetoothListAdapter(Context context, ArrayList<String> mylist, fyp001_BluetoothConnectionRobotApp bcra) {
         mInflater = LayoutInflater.from(context);
        this.mRobot_Bluetooth_List = mylist;
        this.bcra = bcra;
@@ -56,8 +55,8 @@ public class ConnectRobot_BluetoothListAdapter extends RecyclerView.Adapter<Conn
     }
     // Create new views (invoked by the layout manager)
     @Override
-    public ConnectRobot_BluetoothListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
-        View mItemView = mInflater.inflate(R.layout.bluetooth_recyclerview_item, parent, false);
+    public fyp001_ConnectRobot_BluetoothListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
+        View mItemView = mInflater.inflate(R.layout.fyp001_bluetooth_recyclerview_item, parent, false);
         return new MyViewHolder(mItemView, this);
     }
 
