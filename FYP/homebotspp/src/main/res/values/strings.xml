@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">HomeBot SPP</string>
+    <string name="msg_bt_not_connected">Connecting failed!</string>
+    <string name="msg_bt_connected">Connecting success!</string>
+</resources>

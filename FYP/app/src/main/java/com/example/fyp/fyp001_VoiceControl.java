@@ -48,6 +48,9 @@ import android.widget.ImageView;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 
+import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.mobile;
+import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.turret;
+
 public class fyp001_VoiceControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2
 {
     /*private declarations*/
@@ -84,7 +87,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
 
     Return:
         no return value
-     */
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -196,6 +199,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
     Import:
         requestCode, int, integer that specify what the request is
         resultCode, int, integer that specify whether the result has been successfully proceeded
+        data, Intent, intent that contains data
 
     Export:
         identify the user's word from the data then call the helper functions from the application class bcra
@@ -224,15 +228,42 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
                 }
                 switch (command.toUpperCase())
                 {
-                    case "FORWARD" : bcra.blewriteCharacteristic_byte(bcra.get_forward_byte_array());
+                    case "FORWARD" :
+                        if (mobile != null) {
+                            mobile.sidewayUp();
+                            if (turret != null){
+                                turret.home();
+                            }
+                        }
                         break;
-                    case "BACKWARD" : bcra.blewriteCharacteristic_byte(bcra.get_backward_byte_array());
+                    case "BACKWARD" :
+                        if (mobile != null) {
+                            mobile.sidewayDown();
+                        }
                         break;
-                    case "LEFT" : bcra.blewriteCharacteristic_byte(bcra.get_left_byte_array());
+                    case "LEFT" :
+                        if (mobile != null) {
+                            mobile.sidewayLeft();
+                            if (turret != null){
+                                turret.panLeft();
+                            }
+                        }
                         break;
-                    case "RIGHT" : bcra.blewriteCharacteristic_byte(bcra.get_right_byte_array());
+                    case "RIGHT" :
+                        if (mobile != null) {
+                            mobile.sidewayRight();
+                            if (turret != null){
+                                turret.panRight();
+                            }
+                        }
                         break;
-                    case "STOP" : //do nothing
+                    case "STOP" :
+                        if (mobile != null) {
+                            mobile.halt();
+                            if (turret != null){
+                                turret.home();
+                            }
+                        }
                         break;
                     default: //do nothing
                         break;

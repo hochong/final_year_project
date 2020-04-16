@@ -37,5 +37,7 @@ dependencies {
 
     compile project(path: ':virtualjoystick')
     implementation project(path: ':openCVLibrary343')
+    implementation project(path: ':libspp')
+    implementation project(path: ':homebotspp')
 
 }

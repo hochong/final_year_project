@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.makerlab.protocol.Mobile;
+import com.makerlab.protocol.Turret;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -39,6 +41,8 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     UUID selectedcharuuid;
     private static final int PORT = 9020;
     private ServerSocket listener;
+    private Mobile mobile = null;
+    private Turret turret = null;
 
     //handler to send msg to robot at regular time interval
     private final int up = 0;
@@ -70,6 +74,8 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
         });
 
         bcra = (fyp001_BluetoothConnectionRobotApp) getApplication();
+        mobile = bcra.get_mobile();
+        turret = bcra.get_turret();
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
@@ -79,33 +85,50 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
                 //move forwards 90+-20 activate over 70%
                 if (angle > 70 && angle < 110 && strength >70){
                     Log.i("MainActivity", "move forward");
-                    if (bcra != null) {
-                        bcra.blewriteCharacteristic_byte(bcra.get_forward_byte_array());
+                    if (mobile != null) {
+                        mobile.sidewayUp();
+                        if (turret != null){
+                            turret.home();
+                        }
                     }
                 }
 
                 //move left 180+-20 activate over 70%
                 if (angle > 160 && angle < 200 && strength >70){
                     Log.i("MainActivity", "move left");
-                    if (bcra != null) {
-                        bcra.blewriteCharacteristic_byte(bcra.get_left_byte_array());
+                    if (mobile != null) {
+                        mobile.sidewayLeft();
+                        if (turret != null){
+                            turret.panLeft();
+                        }
                     }
-
                 }
 
                 //move right 0+-20 activate over 70%
                 if ((angle > 340 || angle < 20) && strength >70){
                     Log.i("MainActivity", "move right");
-                    if (bcra != null) {
-                        bcra.blewriteCharacteristic_byte(bcra.get_right_byte_array());
+                    if (mobile != null) {
+                        mobile.sidewayRight();
+                        if (turret != null){
+                            turret.panRight();
+                        }
                     }
                 }
 
                 //move backwards 270+-20 activate over 70%
                 if (angle > 250 && angle < 290 && strength >70){
                     Log.i("MainActivity", "move backward");
-                    if (bcra != null) {
-                        bcra.blewriteCharacteristic_byte(bcra.get_backward_byte_array());
+                    if (mobile != null) {
+                        mobile.sidewayDown();
+                    }
+                }
+                else{
+                    Log.i("MainActivity", "halt");
+                    if (mobile != null){
+                        mobile.halt();
+                        if (turret != null){
+                            turret.home();
+                        }
                     }
                 }
 

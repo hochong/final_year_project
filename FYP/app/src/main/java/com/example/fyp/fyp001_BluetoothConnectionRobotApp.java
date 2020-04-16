@@ -16,6 +16,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 
+import com.makerlab.bt.BluetoothConnect;
+import com.makerlab.protocol.Mobile;
+import com.makerlab.protocol.Turret;
+
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
@@ -34,6 +38,10 @@ import java.io.FileOutputStream;
 import java.util.UUID;
 
 public class fyp001_BluetoothConnectionRobotApp extends Application {
+    public static Turret turret = null;
+    public static Mobile mobile = null;
+    public static BluetoothConnect mBluetoothTurretConnect;               /*bluetooth connection*/
+    public static BluetoothConnect mBluetoothMobileConnect;               /*bluetooth connection*/
     private BluetoothAdapter mBluetooth;
     BluetoothDevice device;
     BluetoothGatt mBluetoothGatt;
@@ -122,6 +130,11 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     public byte[] get_backward_byte_array() {return backward_byte_array;}
     public byte[] get_left_byte_array() {return left_byte_array;}
     public byte[] get_right_byte_array() {return right_byte_array;}
+
+    public synchronized static void create_new_mobile(BluetoothConnect  bluetoothConnect){ mobile = new Mobile(bluetoothConnect);}
+    public synchronized static void create_new_turret(BluetoothConnect  bluetoothConnect){ turret = new Turret(bluetoothConnect);}
+    public synchronized static Mobile get_mobile(){return mobile;}
+    public synchronized static Turret get_turret(){return turret;}
 
 
     public Boolean loadOpenCVNet(){
