@@ -26,31 +26,39 @@ import java.util.UUID;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
+import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.mobile;
+import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.turret;
+
 public class fyp001_JoystickControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
-    private static final String TAG = "JoystickControl";
-    //openCV camera
-    private CameraBridgeViewBase mOpenCvCameraView;
+    private static final String TAG = "JoystickControl";            /*tag for log purpose*/
 
-    //camera
-    //private Camera mCamera;
-    //private CameraControlApp.CameraPreview mPreview;
+    private CameraBridgeViewBase mOpenCvCameraView;                 /*openCV camera*/
 
-    private fyp001_BluetoothConnectionRobotApp bcra;
-    BluetoothGatt mBluetoothGatt;
-    UUID selectedserviceuuid;
-    UUID selectedcharuuid;
-    private static final int PORT = 9020;
-    private ServerSocket listener;
-    private Mobile mobile = null;
-    private Turret turret = null;
+    private fyp001_BluetoothConnectionRobotApp bcra;                /*helper class*/
 
-    //handler to send msg to robot at regular time interval
-    private final int up = 0;
-    private final int right = 3;
-    private final int down = 6;
-    private final int left = 9;
-    private final int interval = 500;//0.5sec
+    private static final int PORT = 9020;                           /*socket*/
+    private ServerSocket listener;                                  /*socket*/
 
+
+    /*
+    Public function definitions
+
+    Function Name: void onCreate
+                    Bundle savedInstanceState
+
+    Description:
+        first called when activity launched
+        set the layout and listeners
+
+    Import:
+        savedInstanceState, Bundle, initial or state of this activity before it is paused
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +69,24 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
 
 
         fab.setOnClickListener(new View.OnClickListener() {
+            /*
+            Public function definitions
+
+            Function Name: void onClick
+                            View view
+
+            Description:
+                switch to voiceControl activity
+
+            Import:
+                view View
+
+            Export:
+                no export
+
+            Return:
+                no return
+            */
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Switch to Voice Control", Snackbar.LENGTH_LONG)
@@ -79,6 +105,28 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
+            /*
+            Public function definitions
+
+            Function Name: void onMove
+                            int angle
+                            int strength
+
+            Description:
+                override function to control the joystick
+                using angle and strength to determine the joystick's position
+                direct the robot to move in the corresponding position
+
+            Import:
+                angle, int, intger that determine the polar coordinate of the joystick
+                strength, int, integer that determine the polar coordinate of the joystick
+
+            Export:
+                no export
+
+            Return:
+                no return
+            */
             @Override
             //TODO implement actual moving through bluetooth connection
             public void onMove(int angle, int strength) {
@@ -144,7 +192,24 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             Log.i(TAG,"Camera Start!");
         }
     }
+    /*
+    Public function definitions
 
+    Function Name: void toVoiceControl
+                    View view
+
+    Description:
+        get user to VoiceControl activity
+
+    Import:
+        view View
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public void connectToOtherPhones(View view) {
 
         try {
@@ -180,13 +245,47 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
 
 
     }
+    /*
+    Public function definitions
 
+    Function Name: void toVoiceControl
+                    View view
+
+    Description:
+        get user to VoiceControl activity
+
+    Import:
+        view View
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
 
     public void toVoiceControl(View view) {
         Intent i = new Intent(this, fyp001_VoiceControl.class);
         startActivity(i);
     }
+    /*
+    Public function definitions
 
+    Function Name: void onDestroy
+
+    Description:
+        override function
+        close the socket
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -196,17 +295,70 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             e.printStackTrace();
         }
     }
+    /*
+    Public function definitions
 
+    Function Name: void onCameraViewStarted
+                    int width
+                    int height
+
+    Description:
+        override function
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     @Override
     public void onCameraViewStarted(int width, int height) {
         Log.i(TAG,"openCV joystick camera started!");
     }
+    /*
+    Public function definitions
 
+    Function Name: void onCameraViewStopped
+
+    Description:
+        override function
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     @Override
     public void onCameraViewStopped() {
-
+        /*empty body*/
     }
+    /*
+    Public function definitions
 
+    Function Name: Mat onCameraFrame
+                        CameraBridgeViewBase.CvCameraViewFrame inputFrame
+
+    Description:
+        on each frame returned by the camera, this function will call the helper function in application class bcra
+        the frame will be analysed and green boxes will be drew around the object identified
+        then it will be returned to the cameraView in the layout file
+
+    Import:
+        input Frame, CvCameraViewFrame, the frame captured by the camera in each sec
+
+    Export:
+        no export
+
+    Return:
+        analysed frame will be returned to the cameraView
+     */
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         return bcra.processFrame(inputFrame);

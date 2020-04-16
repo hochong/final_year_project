@@ -51,8 +51,7 @@ import org.opencv.core.Mat;
 import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.mobile;
 import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.turret;
 
-public class fyp001_VoiceControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2
-{
+public class fyp001_VoiceControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     /*private declarations*/
 
     private static final String TAG = "VoiceControl";                       /*TAG for log output*/
@@ -89,8 +88,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
         no return value
     */
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fyp001_activity_voice_control);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -105,8 +103,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
          */
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED)
-        {
+                != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.RECORD_AUDIO},
@@ -177,8 +174,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
     Return:
         no return value
      */
-    private void startListening ()
-    {
+    private void startListening () {
         srIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         srIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         //srIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, instruction);
@@ -210,24 +206,18 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
         no return value
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SpeechRecognizerInt)
-        {
-            if (resultCode==RESULT_OK)
-            {
+        if (requestCode == SpeechRecognizerInt) {
+            if (resultCode==RESULT_OK) {
                 String command = "init";
-                try
-                {
+                try {
                      command = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
                     Log.i("VoiceControlActivity", "result = " + command);
-                }catch(Exception e)
-                {
+                }catch(Exception e) {
                     /*empty body*/
                 }
-                switch (command.toUpperCase())
-                {
+                switch (command.toUpperCase()) {
                     case "FORWARD" :
                         if (mobile != null) {
                             mobile.sidewayUp();
@@ -291,8 +281,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
     Return:
         no return value
      */
-    public void to_JoystickControl()
-    {
+    public void to_JoystickControl() {
         Intent i = new Intent(this, fyp001_JoystickControl.class);
         startActivity(i);
     }
@@ -315,13 +304,10 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
     Return:
         no return value
      */
-    private void set_mic_image(boolean onoff)
-    {
-        if (onoff)
-        {
+    private void set_mic_image(boolean onoff) {
+        if (onoff) {
             mic.setImageResource(R.drawable.fyp001_ic_mic_on_press);
-        } else
-        {
+        } else {
             mic.setImageResource(R.drawable.fyp001_ic_mic_on);
         }
     }
@@ -347,8 +333,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
         no return value
      */
     @Override
-    public void onCameraViewStarted(int width, int height)
-    {
+    public void onCameraViewStarted(int width, int height) {
         Log.i(TAG,"openCV voice camera started!");
     }
 
@@ -370,8 +355,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
         no return value
      */
     @Override
-    public void onCameraViewStopped()
-    {
+    public void onCameraViewStopped() {
         /*empty body*/
     }
 
@@ -396,8 +380,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
         analysed frame will be returned to the cameraView
      */
     @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame)
-    {
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         return bcra.processFrame(inputFrame);
     }
 }

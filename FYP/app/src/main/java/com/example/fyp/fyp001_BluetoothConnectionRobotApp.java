@@ -38,68 +38,21 @@ import java.io.FileOutputStream;
 import java.util.UUID;
 
 public class fyp001_BluetoothConnectionRobotApp extends Application {
-    public static Turret turret = null;
-    public static Mobile mobile = null;
+    public static Turret turret = null;                                   /*turret*/
+    public static Mobile mobile = null;                                   /*mobile*/
     public static BluetoothConnect mBluetoothTurretConnect;               /*bluetooth connection*/
     public static BluetoothConnect mBluetoothMobileConnect;               /*bluetooth connection*/
-    private BluetoothAdapter mBluetooth;
-    BluetoothDevice device;
-    BluetoothGatt mBluetoothGatt;
-    UUID selectedserviceuuid;
-    UUID selectedcharuuid;
-    private String TAG = "BCRA";
-    private Net net = null;
-    String serviceUuid[] = {
-            "0000ffe0-0000-1000-8000-00805f9b34fb",
-            "0000dfb0-0000-1000-8000-00805f9b34fb"
-    };
 
-    String characteristicsUuid[] = {
-            "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "0000dfb1-0000-1000-8000-00805f9b34fb"
-    };
-    private static final String[] classNames = {"background",
+    private String TAG = "BCRA";                                          /*tag for log purpose*/
+    private Net net = null;                                               /*openCv network*/
+
+    private static final String[] classNames = {"background",             /*class names for the network*/
             "aeroplane", "bicycle", "bird", "boat",
             "bottle", "bus", "car", "cat", "chair",
             "cow", "diningtable", "dog", "horse",
             "motorbike", "person", "pottedplant",
             "sheep", "sofa", "train", "tvmonitor"};
-    private static final byte[] forward_byte_array = {
-            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
-            0x01, // it is button 1
-            0x5E, // joystick y
-            0x00, // joystick x
-            0x00, // unuse
-            0x00, // unuse
-            0x7B // checksum
-    };
-    private static final byte[] backward_byte_array = {
-            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
-            0x01, // it is button 1
-            0x00, // joystick y
-            0x00, // joystick x
-            0x00, // unuse
-            0x00, // unuse
-            0x1C // checksum
-    };
-    private static final byte[] left_byte_array = {
-            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
-            0x01, // it is button 1
-            0x00, // joystick y
-            0x00, // joystick x
-            0x00, // unuse
-            0x00, // unuse
-            0x1C // checksum
-    };
-    private static final byte[] right_byte_array = {
-            0x55, (byte)0xAA, 0x11, 0x01/*1 button pressed*/, 0x02,
-            0x01, // it is button 1
-            0x00, // joystick y
-            0x5E, // joystick x
-            0x00, // unuse
-            0x00, // unuse
-            0x7B // checksum
-    };
+
     static {
         if (!OpenCVLoader.initDebug()) {
             Log.i("BCRA", "OpenCV failed to load");
@@ -108,35 +61,108 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
             Log.i("BCRA", "OpenCV loaded successfully");
         }
     }
-    public synchronized void setBTConnectiondevice(BluetoothDevice d) {
-        device = d;
-    }
-    public synchronized BluetoothDevice getBTConnection(){
-        return device;
-    }
-    public synchronized void setBTConnection(BluetoothGatt gatt){
-        mBluetoothGatt = gatt;
-    }
-    public synchronized void setServiceuuid(UUID serviceuuid){
-        selectedserviceuuid = serviceuuid;
-    }
-    public synchronized void setCharuuid(UUID charuuid){
-        selectedcharuuid = charuuid;
-    }
-    public BluetoothAdapter getmBluetooth() {
-        return mBluetooth;
-    }
-    public byte[] get_forward_byte_array() {return forward_byte_array;}
-    public byte[] get_backward_byte_array() {return backward_byte_array;}
-    public byte[] get_left_byte_array() {return left_byte_array;}
-    public byte[] get_right_byte_array() {return right_byte_array;}
 
-    public synchronized static void create_new_mobile(BluetoothConnect  bluetoothConnect){ mobile = new Mobile(bluetoothConnect);}
-    public synchronized static void create_new_turret(BluetoothConnect  bluetoothConnect){ turret = new Turret(bluetoothConnect);}
-    public synchronized static Mobile get_mobile(){return mobile;}
-    public synchronized static Turret get_turret(){return turret;}
+    /*
+    Public function definitions
 
+    Function Name: void create_new_mobile
+                    BluetoothConnect bluetoothConnect
 
+    Description:
+        create new mobile
+
+    Import:
+        bluetoothConnect, BluetoothConnect, connection that is already connected to a device
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
+    public synchronized static void create_new_mobile(BluetoothConnect  bluetoothConnect){
+        mobile = new Mobile(bluetoothConnect);
+    }
+    /*
+    Public function definitions
+
+    Function Name: void create_new_turret
+                    BluetoothConnect bluetoothConnect
+
+    Description:
+        create new turret
+
+    Import:
+        bluetoothConnect, BluetoothConnect, connection that is already connected to a device
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
+    public synchronized static void create_new_turret(BluetoothConnect  bluetoothConnect){
+        turret = new Turret(bluetoothConnect);
+    }
+    /*
+    Public function definitions
+
+    Function Name: void get_mobile
+
+    Description:
+        get mobile from helper class
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        return mobile
+    */
+    public synchronized static Mobile get_mobile(){
+        return mobile;
+    }
+    /*
+    Public function definitions
+
+    Function Name: void get_turret
+
+    Description:
+        get turret from helper class
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        return turret
+    */
+    public synchronized static Turret get_turret(){
+        return turret;
+    }
+
+    /*
+    Public function definitions
+
+    Function Name: void loadOpenCVNet
+
+    Description:
+        load proto and weights for openCV
+        construct the net for the network
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        return turret
+    */
     public Boolean loadOpenCVNet(){
 
             String proto = getPath("MobileNetSSD_deploy.prototxt", this);
@@ -150,6 +176,24 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
 
     }
 
+    /*
+    Public function definitions
+
+    Function Name: mat processFrame
+                    CvCameraViewFrame inputFrame
+
+    Description:
+        analyse the frame
+        identify the person and obstacles
+    Import:
+        input Frame, CvCameraViewFrame, the frame captured by the camera in each sec
+
+    Export:
+        no export
+
+    Return:
+        return frame
+    */
     public Mat processFrame (CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Boolean loadNet = false;
         if (net == null) {
@@ -214,140 +258,57 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
 
         return frame;
     }
-    /*public String create_protocol_message(int button, int rockerformat, int rocker1, int rocker2, int rocker3, int rocker4) {
-        String header = hextostring(0x55);
-        String headerempty = hextostring(0xAA);
-        String address = hextostring(0x11);
-        String buttonquantity = hextostring(0x00);
-        String rockerposition = hextostring(rockerformat);
-        String b = hextostring(button);
-        String r1 = hextostring(rocker1);
-        String r2 = hextostring(rocker2);
-        String r3 = hextostring(rocker3);
-        String r4 = hextostring(rocker4);
-
-        //add checksum
-        int sum = 0x55 + 0xAA + 0x11 + 0x00 + button + rockerformat + rocker1 + rocker2 + rocker3 + rocker4;
-        int checksum = (sum/256) + (sum % 256);
 
 
-        String returnString = header + headerempty + address + buttonquantity + rockerposition + b + r1 + r2 + r3 + r4+ checksum;
-        return returnString;
-    }
-    public String hextostring(int value) {
-        String twohex = Integer.toHexString(value);
-       if (value < 0x0f){
-           return "0" + twohex;
-       }
+    /*
+    Public function definitions
 
-        return twohex;
-    }*/
+    Function Name: void onTerminate
 
-    public boolean blewriteCharacteristic_byte(byte[] msg){
+    Description:
+        close connections
 
-        //check mBluetoothGatt is available
-        if (mBluetoothGatt == null) {
-            Log.e(TAG, "lost connection");
-            return false;
-        }
-        int i = 1;
-        //BluetoothGattService Service = mBluetoothGatt.getService(selectedserviceuuid);
-        BluetoothGattService Service = mBluetoothGatt.getService(UUID.fromString(serviceUuid[i]));
-        if (Service == null){
-            i = 2;
-        }
-        Service = mBluetoothGatt.getService(UUID.fromString(serviceUuid[i]));
-        if (Service == null) {
-            Log.e(TAG, "service not found! Wtih service uuid = " + selectedserviceuuid.toString());
-            return false;
-        }
-        //BluetoothGattCharacteristic charac = Service.getCharacteristic(selectedcharuuid);
-        BluetoothGattCharacteristic charac = Service.getCharacteristic(UUID.fromString(characteristicsUuid[i]));
-        if (charac == null) {
-            Log.e(TAG, "char not found!");
-            return false;
-        }
+    Import:
+        no import
 
+    Export:
+        no export
 
-        Log.d(TAG, "msg" + msg);
-        charac.setValue(msg);
-        boolean status = mBluetoothGatt.writeCharacteristic(charac);
-        return status;
-    }
-
-    public void connectToGattServer(BluetoothDevice device, UUID serviceuuid, UUID charuuid) {
-        this.mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        this.selectedserviceuuid = serviceuuid;
-        this.selectedcharuuid = charuuid;
-        this.device = device;
-        /*setBTConnectiondevice(device);
-        setBTConnection(mBluetoothGatt);
-        setServiceuuid(serviceuuid);
-        setCharuuid(charuuid);*/
-
-        setNotification(serviceuuid,charuuid);
-        Log.d(TAG, "Service: " + serviceuuid);
-        Log.d(TAG, "Char: " + charuuid);
-
-    }
-    private void setNotification(UUID sid,UUID cid){
-
-        BluetoothGattCharacteristic characteristic;
-        characteristic = mBluetoothGatt.getService(sid).getCharacteristic(cid);
-        boolean enabled = true;
-        mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-    }
-
+    Return:
+        no return
+    */
     @Override
     public void onTerminate() {
         super.onTerminate();
-        try{//BLE
-            mBluetoothGatt.close();
-        }catch (Exception exception){
-
+        if (mBluetoothMobileConnect != null){
+            mBluetoothMobileConnect.disconnectBluetooth();
+        }
+        if (mBluetoothTurretConnect != null){
+            mBluetoothTurretConnect.disconnectBluetooth();
         }
     }
 
-    private final BluetoothGattCallback mGattCallback =
-            new BluetoothGattCallback() {
-                @Override
-                public void onConnectionStateChange(BluetoothGatt gatt,
-                                                    int status, int newState) {
-                    super.onConnectionStateChange(gatt, status, newState);
-                    if (newState == BluetoothProfile.STATE_CONNECTED) {
-                        mBluetoothGatt.discoverServices();
-                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                        Log.d(TAG, "Disconnected from GATT server.");
-                    }
-                }
-                @Override
-                public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                    super.onServicesDiscovered(gatt, status);
-                    for (BluetoothGattService service: gatt.getServices()) {
-                        Log.d(TAG, "Service: " + service.getUuid());
+    /*
+    Public function definitions
 
-                        for (BluetoothGattCharacteristic characteristic :
-                                service.getCharacteristics()) {
-                            Log.d(TAG, "Value: " + characteristic.getValue());
-                            for (BluetoothGattDescriptor descriptor :
-                                    characteristic.getDescriptors()) {
-                                try{
-                                    Log.d(TAG, descriptor.getValue().toString());
-                                }catch (Exception e){ }
+    Function Name: String getPath
+                    String f
+                    Context c
 
-                            }
-                        }
-                    }
+    Description:
+        get the file from the string name
+        and return the full path
 
-                }
-                @Override
-                public void onCharacteristicChanged(BluetoothGatt gatt,
-                                                    BluetoothGattCharacteristic characteristic) {
-                    super.onCharacteristicChanged(gatt, characteristic);
+    Import:
+        f, string, the naem of the file
+        c, Context, object
 
-                }
-            };
+    Export:
+        no export
 
+    Return:
+        return the full path of the file
+    */
     private static String getPath(String f, Context c){
         AssetManager am = c.getAssets();
         BufferedInputStream inputStream = null;
@@ -368,35 +329,5 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         }
         return "";
     }
-    /* only send msg to robot but not listening to its response
-    private boolean mListening = false;
-    private String listenForMessages(BluetoothSocket socket,
-                                     StringBuilder incoming) {
-        String result = "";
-        mListening = true;
 
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-
-        try {
-            InputStream instream = socket.getInputStream();
-            int bytesRead = -1;
-
-            while (mListening) {
-                bytesRead = instream.read(buffer);
-                if (bytesRead != -1) {
-                    while ((bytesRead == bufferSize) &&
-                            (buffer[bufferSize-1] != 0)) {
-                        result = result + new String(buffer, 0, bytesRead - 1);
-                        bytesRead = instream.read(buffer);
-                    }
-                    result = result + new String(buffer, 0, bytesRead - 1);
-                    incoming.append(result);
-                }
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Message receive failed.", e);
-        }
-        return result;
-    }*/
 }
