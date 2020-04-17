@@ -183,8 +183,10 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                     CvCameraViewFrame inputFrame
 
     Description:
+        modify function from https://docs.opencv.org/3.4/d0/d6c/tutorial_dnn_android.html
         analyse the frame
         identify the person and obstacles
+
     Import:
         input Frame, CvCameraViewFrame, the frame captured by the camera in each sec
 
@@ -203,7 +205,6 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         }
         final int IN_WIDTH = 300;
         final int IN_HEIGHT = 300;
-        //final float WH_RATIO = (float) IN_WIDTH/IN_HEIGHT;
         final double IN_SCALE_FACTOR = 0.007843;
         final double MEAN_VAL = 127.5;
         final double THRESHOLD = 0.1;
@@ -224,18 +225,31 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         Mat detections = net.forward();
         int cols = frame.cols();
         int rows = frame.rows();
+
+        //create a box for axis aligned bounding box
+        int centerbox_min_x = (int) (cols * 0.4);
+        int centerbox_max_x = (int) (cols * 0.6);
+        int centerbox_min_y = (int) (rows);
+        int centerbox_max_y = (int) (rows * 0.3);
         detections = detections.reshape(1, (int)detections.total()/7);
+        Boolean obs_at_center = false;
+        Boolean person = false;
         for (int i = 0; i < detections.rows(); i++){
             double confidence = detections.get (i, 2)[0];
+
             if (confidence > THRESHOLD) {
                 int classId = (int) detections.get(i, 1)[0];
-                int left = (int)(detections.get (i,3)[0] * cols);
-                int right = (int) (detections.get(i,4)[0] * rows);
-                int top = (int) (detections.get(i,5)[0] * cols);
-                int bottom = (int)(detections.get(i,6)[0] * rows);
+                int min_x = (int)(detections.get (i,3)[0] * cols);
+                int max_y = (int) (detections.get(i,4)[0] * rows);
+                int max_x = (int) (detections.get(i,5)[0] * cols);
+                int min_y = (int)(detections.get(i,6)[0] * rows);
+                int left = min_x;
+                int top = max_y;
+                int right = max_x;
+                int bottom = min_y;
                 String label = classNames[classId] + ": "+confidence;
-                /*
-                //draw rect around dtected obj
+
+                //draw rect around detected obj
                 Imgproc.rectangle(frame,
                         new Point(left,top),
                         new Point(right,bottom),
@@ -245,17 +259,30 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
 
                 //draw background for label
                 Imgproc.rectangle(frame, new Point(left, top - labelSize.height), new Point(left + labelSize.width, top+baseLine[0]),new Scalar(255,255,255), 1);
-
                 //write class name and conf
                 Imgproc.putText(frame,label, new Point(left,top), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0,0,0));
-                */
+
                 //output log
                 Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label);
-                //TODO: avoid obj if it is in the center with conf > 0.5
-                //TODO: rotate if person found with conf > 0.5
+                //if collide and conf > 0.6, assume obstacle at center
+                if (!(centerbox_max_x<min_x || max_x<centerbox_min_x || centerbox_max_y<min_y || max_y<centerbox_min_y) &&
+                        confidence > 0.6){
+                    obs_at_center = true;
+                }
+                if (classId == 15 && confidence > 0.6){
+                    person = true;
+                }
+
             }
         }
-
+        //stops the robot if it is at the center
+        if (obs_at_center){
+            mobile.halt();
+        }
+        //look up to see the face if there is a person
+        if (person) {
+            turret.tiltUp();
+        }
         return frame;
     }
 
@@ -296,6 +323,8 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                     Context c
 
     Description:
+        get model and config files downloaded from https://github.com/chuanqi305/MobileNet-SSD
+        and store in assets folder
         get the file from the string name
         and return the full path
 

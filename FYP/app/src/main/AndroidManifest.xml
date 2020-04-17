@@ -31,7 +31,6 @@
             android:name=".fyp001_JoystickControl"
             android:label="@string/title_activity_joystick_control"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".fyp001_ConnectRobot" />
         <activity android:name=".fyp001_MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
