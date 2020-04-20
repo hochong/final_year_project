@@ -248,7 +248,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                 int right = max_x;
                 int bottom = min_y;
                 String label = classNames[classId] + ": "+confidence;
-
+                /*
                 //draw rect around detected obj
                 Imgproc.rectangle(frame,
                         new Point(left,top),
@@ -261,7 +261,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                 Imgproc.rectangle(frame, new Point(left, top - labelSize.height), new Point(left + labelSize.width, top+baseLine[0]),new Scalar(255,255,255), 1);
                 //write class name and conf
                 Imgproc.putText(frame,label, new Point(left,top), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0,0,0));
-
+                */
                 //output log
                 Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label);
                 //if collide and conf > 0.6, assume obstacle at center

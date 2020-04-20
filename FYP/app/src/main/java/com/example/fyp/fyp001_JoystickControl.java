@@ -265,6 +265,9 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     */
 
     public void toVoiceControl(View view) {
+        if (mOpenCvCameraView != null){
+            mOpenCvCameraView.disableView();
+        }
         Intent i = new Intent(this, fyp001_VoiceControl.class);
         startActivity(i);
     }

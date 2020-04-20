@@ -282,6 +282,9 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
         no return value
      */
     public void to_JoystickControl() {
+        if (mOpenCvCameraView != null){
+            mOpenCvCameraView.disableView();
+        }
         Intent i = new Intent(this, fyp001_JoystickControl.class);
         startActivity(i);
     }

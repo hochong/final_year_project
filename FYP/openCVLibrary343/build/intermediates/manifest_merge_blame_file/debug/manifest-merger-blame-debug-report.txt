@@ -11,4 +11,8 @@
 9        android:targetSdkVersion="28" />
 9-->C:\Users\yahagi\AndroidStudioProjects\final_year_project\FYP\openCVLibrary343\src\main\AndroidManifest.xml:7:15-44
 10
-11</manifest>
+11    <uses-permission android:name="android.permission.CAMERA" />
+11-->C:\Users\yahagi\AndroidStudioProjects\final_year_project\FYP\openCVLibrary343\src\main\AndroidManifest.xml:8:5-65
+11-->C:\Users\yahagi\AndroidStudioProjects\final_year_project\FYP\openCVLibrary343\src\main\AndroidManifest.xml:8:22-62
+12
+13</manifest>
