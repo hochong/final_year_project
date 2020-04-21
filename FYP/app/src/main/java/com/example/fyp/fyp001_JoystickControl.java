@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.Utils;
@@ -183,6 +184,21 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             mOpenCvCameraView.enableView();
             Log.i(TAG,"Camera Start!");
         }
+    }
+    public void turret_home(View view){
+        bcra.set_turret_movement(Turret.HOME);
+    }
+    public void turret_up(View view){
+        bcra.set_turret_movement(Turret.UP);
+    }
+    public void turret_down(View view){
+        bcra.set_turret_movement(Turret.DOWN);
+    }
+    public void turret_left(View view){
+        bcra.set_turret_movement(Turret.LEFT);
+    }
+    public void turret_right(View view){
+        bcra.set_turret_movement(Turret.RIGHT);
     }
     /*
     Public function definitions
@@ -353,5 +369,9 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         return bcra.processFrame(inputFrame);
+    }
+
+    public void make_warning_toast(){
+        Toast.makeText(this,"Obstacle(s) detected at the front of the camera",Toast.LENGTH_LONG);
     }
 }

@@ -48,6 +48,8 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     int TURRET_DELAY = 1000;
     int TURRET_INTERVAL = 1000;
 
+    private boolean obs_at_center = false;
+
     private String TAG = "BCRA";                                          /*tag for log purpose*/
     private Net net = null;                                               /*openCv network*/
 
@@ -65,6 +67,9 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         else {
             Log.i("BCRA", "OpenCV loaded successfully");
         }
+    }
+    public boolean get_obs_at_center() {
+        return obs_at_center;
     }
     public synchronized static void set_turret_device(BluetoothDevice device){
         mBluetoothTurretDevice = device;
@@ -265,8 +270,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         int centerbox_min_y = (int) (rows);
         int centerbox_max_y = (int) (rows * 0.3);
         detections = detections.reshape(1, (int)detections.total()/7);
-        Boolean obs_at_center = false;
-        Boolean person = false;
+
         for (int i = 0; i < detections.rows(); i++){
             double confidence = detections.get (i, 2)[0];
 
@@ -302,19 +306,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                         confidence > 0.6){
                     obs_at_center = true;
                 }
-                if (classId == 15 && confidence > 0.6){
-                    person = true;
-                }
-
             }
-        }
-        //stops the robot if it is at the center
-        if (obs_at_center){
-            mobile.halt();
-        }
-        //look up to see the face if there is a person
-        if (person) {
-            turret.tiltUp();
         }
         return frame;
     }
