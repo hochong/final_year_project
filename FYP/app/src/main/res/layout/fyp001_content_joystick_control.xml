@@ -47,51 +47,57 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
+        android:layout_marginBottom="10dp"
         android:onClick="turret_home"
         android:text="Home"
-        app:layout_constraintStart_toEndOf="@+id/button_turret_left"
-        tools:layout_editor_absoluteY="557dp" />
+        android:alpha="0.5"
+        app:layout_constraintBottom_toTopOf="@+id/button_turret_down"
+        app:layout_constraintStart_toEndOf="@+id/button_turret_left" />
 
     <Button
         android:id="@+id/button_turret_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Left"
         android:onClick="turret_left"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="557dp" />
+        android:text="Left"
+        android:alpha="0.5"
+        app:layout_constraintBottom_toBottomOf="@+id/button_turret_home"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/button_turret_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:text="Right"
         android:onClick="turret_right"
-        app:layout_constraintStart_toEndOf="@+id/button_turret_home"
-        tools:layout_editor_absoluteY="557dp" />
+        android:text="Right"
+        android:alpha="0.5"
+        app:layout_constraintBottom_toBottomOf="@+id/button_turret_home"
+        app:layout_constraintStart_toEndOf="@+id/button_turret_home" />
 
     <Button
         android:id="@+id/button_turret_up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginBottom="10dp"
-        android:text="Up"
         android:onClick="turret_up"
+        android:text="Up"
+        android:alpha="0.5"
         app:layout_constraintBottom_toTopOf="@+id/button_turret_home"
-        tools:layout_editor_absoluteX="98dp" />
+        app:layout_constraintStart_toEndOf="@+id/button_turret_left" />
 
     <Button
         android:id="@+id/button_turret_down"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginBottom="30dp"
         android:onClick="turret_down"
         android:text="Down"
+        android:alpha="0.5"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_turret_home"
-        tools:layout_editor_absoluteX="96dp" />
+        app:layout_constraintStart_toEndOf="@+id/button_turret_left" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
