@@ -48,7 +48,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     int TURRET_DELAY = 1000;
     int TURRET_INTERVAL = 1000;
 
-    private boolean obs_at_center = false;
+    private static boolean obs_at_center = false;
 
     private String TAG = "BCRA";                                          /*tag for log purpose*/
     private Net net = null;                                               /*openCv network*/
@@ -68,7 +68,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
             Log.i("BCRA", "OpenCV loaded successfully");
         }
     }
-    public boolean get_obs_at_center() {
+    public static boolean get_obs_at_center() {
         return obs_at_center;
     }
     public synchronized static void set_turret_device(BluetoothDevice device){
@@ -270,7 +270,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         int centerbox_min_y = (int) (rows);
         int centerbox_max_y = (int) (rows * 0.3);
         detections = detections.reshape(1, (int)detections.total()/7);
-
+        boolean obs_at_center_local = false;
         for (int i = 0; i < detections.rows(); i++){
             double confidence = detections.get (i, 2)[0];
 
@@ -300,14 +300,16 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                 Imgproc.putText(frame,label, new Point(left,top), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0,0,0));
                 */
                 //output log
-                Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label);
+                Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label+"x x y y: " + min_x +" "+ max_x +" "+ min_y +" "+ max_y);
                 //if collide and conf > 0.6, assume obstacle at center
-                if (!(centerbox_max_x<min_x || max_x<centerbox_min_x || centerbox_max_y<min_y || max_y<centerbox_min_y) &&
+                if ((!(centerbox_max_x < min_x) || !(max_x < centerbox_min_x) || !(centerbox_max_y < min_y) || !(max_y < centerbox_min_y)) &&
                         confidence > 0.6){
-                    obs_at_center = true;
+                    Log.i(TAG,"object at center!");
+                    obs_at_center_local = true;
                 }
             }
         }
+        obs_at_center = obs_at_center_local;
         return frame;
     }
 
@@ -379,7 +381,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
 
             return outFile.getAbsolutePath();
         }catch (Exception e) {
-            Log.i("BCRA", "Failed to getpath, read and write " + e);
+            Log.i("BCRA", "Failed to get path" + e);
         }
         return "";
     }
@@ -450,6 +452,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     }
 
     /**
+     * function from https://stackoverflow.com/questions/17355365/convert-socket-to-string-and-vice-versa
      * Get IP address from first non-localhost interface
      * @param useIPv4   true=return ipv4, false=return ipv6
      * @return  address or empty string
