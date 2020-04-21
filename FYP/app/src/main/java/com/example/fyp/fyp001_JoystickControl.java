@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
@@ -131,6 +133,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             @Override
             //TODO implement actual moving through bluetooth connection
             public void onMove(int angle, int strength) {
+
                 //move forwards 90+-20 activate over 70%
                 if (angle > 70 && angle <= 110 && strength > 70){
                     Log.i("MainActivity", "move forward");
@@ -152,25 +155,28 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
                     bcra.set_mobile_movement(Mobile.SIDEWAY_DOWN);
                 }
                 if (angle > 120 && angle <= 160 && strength > 70){
-                    Log.i("MainActivity", "move up + right");
-                    bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
-                }
-                if (angle > 20 && angle <= 70 && strength > 70){
                     Log.i("MainActivity", "move up + left");
                     bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
                 }
-                if (angle > 200 && angle <= 250 && strength > 70){
-                    Log.i("MainActivity", "move down + right");
-                    bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
+                if (angle > 20 && angle <= 70 && strength > 70){
+                    Log.i("MainActivity", "move up + right");
+                    bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
                 }
-                if (angle > 290 && angle <= 340 && strength > 70){
+                if (angle > 200 && angle <= 250 && strength > 70){
                     Log.i("MainActivity", "move down + left");
                     bcra.set_mobile_movement(Mobile.DIAG_DOWN_LEFT);
+                }
+                if (angle > 290 && angle <= 340 && strength > 70){
+                    Log.i("MainActivity", "move down + right");
+                    bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
                 }
                 else{
                     Log.i("MainActivity", "halt");
                     bcra.set_mobile_movement(Mobile.HALT);
                     bcra.set_turret_movement(Turret.HALT);
+                }
+                if (bcra.get_obs_at_center()){
+                    Toast.makeText(fyp001_JoystickControl.this,"Obstacle(s) detected at the front of the camera",Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -369,9 +375,5 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         return bcra.processFrame(inputFrame);
-    }
-
-    public void make_warning_toast(){
-        Toast.makeText(this,"Obstacle(s) detected at the front of the camera",Toast.LENGTH_LONG);
     }
 }
