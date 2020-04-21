@@ -33,6 +33,8 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.makerlab.protocol.Mobile;
+import com.makerlab.protocol.Turret;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -48,8 +50,8 @@ import android.widget.ImageView;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 
-import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.mobile;
-import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.turret;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class fyp001_VoiceControl extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     /*private declarations*/
@@ -219,45 +221,68 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
                 }
                 switch (command.toUpperCase()) {
                     case "FORWARD" :
-                        if (mobile != null) {
-                            mobile.sidewayUp();
-                            if (turret != null){
-                                turret.home();
-                            }
-                        }
+                        bcra.set_mobile_movement(Mobile.SIDEWAY_UP);
                         break;
                     case "BACKWARD" :
-                        if (mobile != null) {
-                            mobile.sidewayDown();
-                        }
+                        bcra.set_mobile_movement(Mobile.SIDEWAY_DOWN);
                         break;
                     case "LEFT" :
-                        if (mobile != null) {
-                            mobile.sidewayLeft();
-                            if (turret != null){
-                                turret.panLeft();
-                            }
-                        }
+                        bcra.set_mobile_movement(Mobile.SIDEWAY_LEFT);
                         break;
                     case "RIGHT" :
-                        if (mobile != null) {
-                            mobile.sidewayRight();
-                            if (turret != null){
-                                turret.panRight();
-                            }
-                        }
+                        bcra.set_mobile_movement(Mobile.SIDEWAY_RIGHT);
                         break;
                     case "STOP" :
-                        if (mobile != null) {
-                            mobile.halt();
-                            if (turret != null){
-                                turret.home();
-                            }
-                        }
+                        bcra.set_mobile_movement(Mobile.HALT);
                         break;
-                    default: //do nothing
+                    case "UP RIGHT":
+                        bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
+                        break;
+                    case "UPRIGHT":
+                        bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
+                        break;
+                    case "UP LEFT":
+                        bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
+                        break;
+                    case "DOWN RIGHT":
+                        bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
+                        break;
+                    case "DOWN LEFT":
+                        bcra.set_mobile_movement(Mobile.DIAG_DOWN_LEFT);
+                        break;
+                    case "TURRET UP":
+                        bcra.set_turret_movement(Turret.UP);
+                        break;
+                    case "TURRET DOWN":
+                        bcra.set_turret_movement(Turret.DOWN);
+                        break;
+                    case "TURRET LEFT":
+                        bcra.set_turret_movement(Turret.LEFT);
+                        break;
+                    case "TURRET RIGHT":
+                        bcra.set_turret_movement(Turret.RIGHT);
+                        break;
+                    case "TURRET HOME":
+                        bcra.set_turret_movement(Turret.HOME);
+                        break;
+
+                    default:
+                        bcra.set_mobile_movement(Mobile.HALT);
+                        bcra.set_turret_movement(Turret.HALT);
                         break;
                 }
+                new Timer().schedule(new TimerTask(){
+                    @Override
+                    public void run(){
+                        bcra.set_mobile_movement(Mobile.HALT);
+                    }
+                },bcra.MOBILE_DELAY);
+                new Timer().schedule(new TimerTask(){
+                    @Override
+                    public void run(){
+                        bcra.set_turret_movement(Turret.HALT);
+                    }
+                },bcra.TURRET_DELAY);
             }
             MIC_ON = !MIC_ON;
             set_mic_image(MIC_ON);

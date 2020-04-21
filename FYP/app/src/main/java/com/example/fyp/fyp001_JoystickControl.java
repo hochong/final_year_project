@@ -17,12 +17,13 @@ import android.view.View;
 import android.widget.Button;
 
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.UUID;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
@@ -38,7 +39,6 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
 
     private static final int PORT = 9020;                           /*socket*/
     private ServerSocket listener;                                  /*socket*/
-
 
     /*
     Public function definitions
@@ -131,53 +131,45 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             //TODO implement actual moving through bluetooth connection
             public void onMove(int angle, int strength) {
                 //move forwards 90+-20 activate over 70%
-                if (angle > 70 && angle < 110 && strength >70){
+                if (angle > 70 && angle <= 110 && strength > 70){
                     Log.i("MainActivity", "move forward");
-                    if (mobile != null) {
-                        mobile.sidewayUp();
-                        if (turret != null){
-                            turret.home();
-                        }
-                    }
+                    bcra.set_mobile_movement(Mobile.SIDEWAY_UP);
                 }
-
                 //move left 180+-20 activate over 70%
-                if (angle > 160 && angle < 200 && strength >70){
+                if (angle > 160 && angle <= 200 && strength > 70){
                     Log.i("MainActivity", "move left");
-                    if (mobile != null) {
-                        mobile.sidewayLeft();
-                        if (turret != null){
-                            turret.panLeft();
-                        }
-                    }
+                    bcra.set_mobile_movement(Mobile.SIDEWAY_LEFT);
                 }
-
                 //move right 0+-20 activate over 70%
-                if ((angle > 340 || angle < 20) && strength >70){
+                if ((angle > 340 || angle <= 20) && strength > 70){
                     Log.i("MainActivity", "move right");
-                    if (mobile != null) {
-                        mobile.sidewayRight();
-                        if (turret != null){
-                            turret.panRight();
-                        }
-                    }
+                    bcra.set_mobile_movement(Mobile.SIDEWAY_RIGHT);
                 }
-
                 //move backwards 270+-20 activate over 70%
-                if (angle > 250 && angle < 290 && strength >70){
+                if (angle > 250 && angle <= 290 && strength > 70){
                     Log.i("MainActivity", "move backward");
-                    if (mobile != null) {
-                        mobile.sidewayDown();
-                    }
+                    bcra.set_mobile_movement(Mobile.SIDEWAY_DOWN);
+                }
+                if (angle > 120 && angle <= 160 && strength > 70){
+                    Log.i("MainActivity", "move up + right");
+                    bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
+                }
+                if (angle > 20 && angle <= 70 && strength > 70){
+                    Log.i("MainActivity", "move up + left");
+                    bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
+                }
+                if (angle > 200 && angle <= 250 && strength > 70){
+                    Log.i("MainActivity", "move down + right");
+                    bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
+                }
+                if (angle > 290 && angle <= 340 && strength > 70){
+                    Log.i("MainActivity", "move down + left");
+                    bcra.set_mobile_movement(Mobile.DIAG_DOWN_LEFT);
                 }
                 else{
                     Log.i("MainActivity", "halt");
-                    if (mobile != null){
-                        mobile.halt();
-                        if (turret != null){
-                            turret.home();
-                        }
-                    }
+                    bcra.set_mobile_movement(Mobile.HALT);
+                    bcra.set_turret_movement(Turret.HALT);
                 }
 
             }
@@ -212,28 +204,24 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     */
     public void connectToOtherPhones(View view) {
 
+        String address = bcra.getIPAddress(true);
         try {
             listener = new ServerSocket(PORT);
+            //button showing ip and port
+            Button b = findViewById(R.id.connect_to_other_phone_button);
+            b.setClickable(false);
+            b.setText(address + ":" + Integer.toString(PORT));
+            Log.e(TAG, "server address: "+ address + ":"+PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
         try{
-            //setup socket
             Socket s = listener.accept();
-
-            //button showing ip and port
-            Button b = findViewById(R.id.connect_to_other_phone_button);
-            b.setText(s.getInetAddress().getHostAddress() + " " + Integer.toString(PORT));
-
             //start thread
             new fyp001_otherPhonesHandler(s, bcra).start();
 
         } catch (Exception e) {
-            try {
-                listener.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            e.printStackTrace();
         }finally {
             try {
                 listener.close();

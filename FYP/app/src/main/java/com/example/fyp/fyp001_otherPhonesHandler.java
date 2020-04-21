@@ -11,6 +11,8 @@ public class fyp001_otherPhonesHandler extends Thread{
     private Socket socket;                              /*thread*/
     private InputStream in;                             /*thread*/
     private byte[] buffer;                              /*thread*/
+    private final byte MOBILE = 0;
+    private final byte TURRET = 1;
 
     private fyp001_BluetoothConnectionRobotApp bcra;    /*helper class*/
 
@@ -79,53 +81,21 @@ public class fyp001_otherPhonesHandler extends Thread{
     public void run() {
         try{
             in = socket.getInputStream();
-
             while (true) {
                 if (this.terminate_flag == 1){
                     interrupt();
                 }
                 in.read(buffer);
                 switch(buffer[0]){
-                    case 0:
-                        if (mobile != null) {
-                            mobile.sidewayUp();
-                            if (turret != null){
-                                turret.home();
-                            }
-                        }
+                    case MOBILE:
+                        bcra.set_mobile_movement(buffer[1]);
                         break;
-                    case 3:
-                        if (mobile != null) {
-                            mobile.sidewayLeft();
-                            if (turret != null){
-                                turret.panLeft();
-                            }
-                        }
-                        break;
-                    case 6:
-                        if (mobile != null) {
-                            mobile.sidewayRight();
-                            if (turret != null){
-                                turret.panRight();
-                            }
-                        }
-                        break;
-                    case 9:
-                        if (mobile != null) {
-                            mobile.sidewayDown();
-                        }
+                    case TURRET:
+                        bcra.set_turret_movement(buffer[1]);
                         break;
                     default:
-                        if (mobile != null){
-                            mobile.halt();
-                            if (turret != null){
-                                turret.home();
-                            }
-                        }
                         break;
                 }
-
-
             }
         } catch (IOException e) {
             e.printStackTrace();

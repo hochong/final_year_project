@@ -2,18 +2,10 @@ package com.example.fyp;
 
 
 import android.app.Application;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
-import android.widget.Toast;
 
 
 import com.makerlab.bt.BluetoothConnect;
@@ -22,10 +14,7 @@ import com.makerlab.protocol.Turret;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
@@ -35,13 +24,29 @@ import org.opencv.imgproc.Imgproc;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.UUID;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class fyp001_BluetoothConnectionRobotApp extends Application {
     public static Turret turret = null;                                   /*turret*/
     public static Mobile mobile = null;                                   /*mobile*/
     public static BluetoothConnect mBluetoothTurretConnect;               /*bluetooth connection*/
     public static BluetoothConnect mBluetoothMobileConnect;               /*bluetooth connection*/
+    public static BluetoothDevice mBluetoothTurretDevice = null;          /*bluetooth connection*/
+    public static BluetoothDevice mBluetoothMobileDevice = null;          /*bluetooth connection*/
+
+    private Timer mobile_timer = null;
+    private Timer turret_timer = null;
+    static byte MOBILE_MOVEMENT = 0;
+    static byte TURRET_MOVEMENT = 0;
+    int MOBILE_DELAY = 1000;
+    int MOBILE_INTERVAL = 1000;
+    int TURRET_DELAY = 1000;
+    int TURRET_INTERVAL = 1000;
 
     private String TAG = "BCRA";                                          /*tag for log purpose*/
     private Net net = null;                                               /*openCv network*/
@@ -61,7 +66,35 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
             Log.i("BCRA", "OpenCV loaded successfully");
         }
     }
+    public synchronized static void set_turret_device(BluetoothDevice device){
+        mBluetoothTurretDevice = device;
+    }
+    public synchronized static void set_mobile_device(BluetoothDevice device){
+        mBluetoothMobileDevice = device;
+    }
+    public synchronized static void set_mobile_movement(byte i){
+        MOBILE_MOVEMENT = i;
+    }
+    public synchronized static void set_turret_movement(byte i){
+        TURRET_MOVEMENT = i;
+    }
+    public synchronized void start_mobile_timer_task(){
+        if (mobile_timer != null){
+            return;
+        }
+        mobile_timer = new Timer();
+        mobile_timer.scheduleAtFixedRate(new fyp001_mobileHandler(), MOBILE_DELAY, MOBILE_INTERVAL);
 
+    }
+
+    public synchronized void start_turret_timer_task(){
+        if (turret_timer != null){
+            return;
+        }
+        turret_timer = new Timer();
+        turret_timer.scheduleAtFixedRate(new fyp001_mobileHandler(), TURRET_DELAY, TURRET_INTERVAL);
+
+    }
     /*
     Public function definitions
 
@@ -359,4 +392,100 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         return "";
     }
 
+    public class fyp001_mobileHandler extends TimerTask {
+        @Override
+        public void run(){
+            if (mBluetoothMobileDevice != null) {
+                switch (MOBILE_MOVEMENT){
+                    case Mobile.SIDEWAY_UP:
+                        mobile.sidewayUp();
+                        break;
+                    case Mobile.SIDEWAY_DOWN:
+                        mobile.sidewayDown();
+                        break;
+                    case Mobile.SIDEWAY_LEFT:
+                        mobile.sidewayLeft();
+                        break;
+                    case Mobile.SIDEWAY_RIGHT:
+                        mobile.sidewayRight();
+                        break;
+                    case Mobile.DIAG_UP_LEFT:
+                        mobile.diagonalUpLeft();
+                        break;
+                    case Mobile.DIAG_UP_RIGHT:
+                        mobile.diagonalUpRight();
+                        break;
+                    case Mobile.DIAG_DOWN_LEFT:
+                        mobile.diagonalDownLeft();
+                        break;
+                    case Mobile.DIAG_DOWN_RIGHT:
+                        mobile.diagonalDownRight();
+                        break;
+                    default:
+                        mobile.halt();
+                        break;
+                }
+            }
+        }
+    }
+
+    public class fyp001_turretHandler extends TimerTask {
+        @Override
+        public void run(){
+            if (mBluetoothTurretDevice != null) {
+                switch(TURRET_MOVEMENT){
+                    case Turret.UP:
+                        turret.tiltUp();
+                        break;
+                    case Turret.LEFT:
+                        turret.panLeft();
+                        break;
+                    case Turret.RIGHT:
+                        turret.panRight();
+                        break;
+                    case Turret.DOWN:
+                        turret.tiltDown();
+                        break;
+                    case Turret.HOME:
+                        turret.home();
+                        break;
+                    default:
+                        turret.halt();
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Get IP address from first non-localhost interface
+     * @param useIPv4   true=return ipv4, false=return ipv6
+     * @return  address or empty string
+     */
+    public static String getIPAddress(boolean useIPv4) {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
+                        String sAddr = addr.getHostAddress();
+                        //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
+                        boolean isIPv4 = sAddr.indexOf(':')<0;
+
+                        if (useIPv4) {
+                            if (isIPv4)
+                                return sAddr;
+                        } else {
+                            if (!isIPv4) {
+                                int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
+                                return delim<0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) { } // for now eat exceptions
+        return "";
+    }
 }

@@ -63,6 +63,10 @@ public class fyp001_MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mBluetoothMobileConnect = new BluetoothConnect(this);
+        mBluetoothTurretConnect = new BluetoothConnect(this);
+
     }
     /*
     Public function definitions
@@ -177,10 +181,10 @@ public class fyp001_MainActivity extends AppCompatActivity {
              if (mBluetoothMobileConnect.isConnected()) {
                  mBluetoothMobileConnect.disconnectBluetooth();
              }
+             fyp001_BluetoothConnectionRobotApp.set_mobile_device(mBluetoothDevice);
              mBluetoothMobileConnect.connectBluetooth(mBluetoothDevice);
              fyp001_BluetoothConnectionRobotApp.create_new_mobile(mBluetoothMobileConnect);
-             Toast.makeText(this, "Mobile connected!", Toast.LENGTH_SHORT).show();
-
+             Toast.makeText(this, "Mobile connected to " + mBluetoothDevice.getName(), Toast.LENGTH_LONG).show();
         } else {
             final BluetoothDevice mBluetoothDevice;
             mBluetoothDevice = resultIntent.getParcelableExtra(BluetoothDevListActivity.EXTRA_KEY_DEVICE);
@@ -190,9 +194,10 @@ public class fyp001_MainActivity extends AppCompatActivity {
             if (mBluetoothTurretConnect.isConnected()) {
                 mBluetoothTurretConnect.disconnectBluetooth();
             }
+            fyp001_BluetoothConnectionRobotApp.set_turret_device(mBluetoothDevice);
             mBluetoothTurretConnect.connectBluetooth(mBluetoothDevice);
-            fyp001_BluetoothConnectionRobotApp.create_new_turret(mBluetoothMobileConnect);
-            Toast.makeText(this,"Turret connected!",Toast.LENGTH_LONG).show();
+            fyp001_BluetoothConnectionRobotApp.create_new_turret(mBluetoothTurretConnect);
+            Toast.makeText(this,"Turret connected to " + mBluetoothDevice.getName(),Toast.LENGTH_LONG).show();
         }
     }
 }
