@@ -159,6 +159,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
             Log.i(TAG,"Camera Start!");
         }
     }
+
     /*
     Private function definitions
 
@@ -179,10 +180,10 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
     private void startListening () {
         srIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         srIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        //srIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, instruction);
         sr.startListening(srIntent);
         startActivityForResult(srIntent, SpeechRecognizerInt);
     }
+
     /*
     Protected function definitions
 
@@ -214,7 +215,7 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
             if (resultCode==RESULT_OK) {
                 String command = "init";
                 try {
-                     command = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
+                    command = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
                     Log.i("VoiceControlActivity", "result = " + command);
                 }catch(Exception e) {
                     /*empty body*/
@@ -227,42 +228,42 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
                         bcra.set_mobile_movement(Mobile.SIDEWAY_DOWN);
                         break;
                     case "LEFT" :
-                        bcra.set_mobile_movement(Mobile.SIDEWAY_LEFT);
+                        bcra.set_mobile_movement(Mobile.SIDEWAY_RIGHT);
                         break;
                     case "RIGHT" :
-                        bcra.set_mobile_movement(Mobile.SIDEWAY_RIGHT);
+                        bcra.set_mobile_movement(Mobile.SIDEWAY_LEFT);
                         break;
                     case "STOP" :
                         bcra.set_mobile_movement(Mobile.HALT);
                         break;
                     case "UP RIGHT":
-                        bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
-                        break;
-                    case "UPRIGHT":
-                        bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
-                        break;
-                    case "UP LEFT":
-                        bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
-                        break;
-                    case "DOWN RIGHT":
                         bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
                         break;
-                    case "DOWN LEFT":
+                    case "UPRIGHT":
+                        bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
+                        break;
+                    case "UP LEFT":
+                        bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
+                        break;
+                    case "DOWN RIGHT":
                         bcra.set_mobile_movement(Mobile.DIAG_DOWN_LEFT);
                         break;
-                    case "TURRET UP":
+                    case "DOWN LEFT":
+                        bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
+                        break;
+                    case "ROBOT ARM UP":
                         bcra.set_turret_movement(Turret.UP);
                         break;
-                    case "TURRET DOWN":
+                    case "ROBOT ARM DOWN":
                         bcra.set_turret_movement(Turret.DOWN);
                         break;
-                    case "TURRET LEFT":
+                    case "ROBOT ARM LEFT":
                         bcra.set_turret_movement(Turret.LEFT);
                         break;
-                    case "TURRET RIGHT":
+                    case "ROBOT ARM RIGHT":
                         bcra.set_turret_movement(Turret.RIGHT);
                         break;
-                    case "TURRET HOME":
+                    case "ROBOT ARM HOME":
                         bcra.set_turret_movement(Turret.HOME);
                         break;
 
@@ -276,13 +277,13 @@ public class fyp001_VoiceControl extends AppCompatActivity implements CameraBrid
                     public void run(){
                         bcra.set_mobile_movement(Mobile.HALT);
                     }
-                },bcra.MOBILE_DELAY);
+                },bcra.MOBILE_DELAY*2);
                 new Timer().schedule(new TimerTask(){
                     @Override
                     public void run(){
                         bcra.set_turret_movement(Turret.HALT);
                     }
-                },bcra.TURRET_DELAY);
+                },bcra.TURRET_DELAY*2);
             }
             MIC_ON = !MIC_ON;
             set_mic_image(MIC_ON);

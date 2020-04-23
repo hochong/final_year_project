@@ -32,23 +32,23 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class fyp001_BluetoothConnectionRobotApp extends Application {
-    public static Turret turret = null;                                   /*turret*/
+    public static Turret turret = null;                                   /*turret/robot arm*/
     public static Mobile mobile = null;                                   /*mobile*/
     public static BluetoothConnect mBluetoothTurretConnect;               /*bluetooth connection*/
     public static BluetoothConnect mBluetoothMobileConnect;               /*bluetooth connection*/
     public static BluetoothDevice mBluetoothTurretDevice = null;          /*bluetooth connection*/
     public static BluetoothDevice mBluetoothMobileDevice = null;          /*bluetooth connection*/
 
-    private Timer mobile_timer = null;
-    private Timer turret_timer = null;
-    static byte MOBILE_MOVEMENT = 0;
-    static byte TURRET_MOVEMENT = 0;
-    int MOBILE_DELAY = 1000;
-    int MOBILE_INTERVAL = 1000;
-    int TURRET_DELAY = 1000;
-    int TURRET_INTERVAL = 1000;
+    private Timer mobile_timer = null;                                    /*timer to regularly send instruction to robot*/
+    private Timer turret_timer = null;                                    /*timer to regularly send instruction to robot arm*/
+    static byte MOBILE_MOVEMENT = 0;                                      /*byte to hold the next instruction going to be sent to robot*/
+    static byte TURRET_MOVEMENT = 0;                                      /*byte to hold the next instruction going to be sent to robot arm*/
+    int MOBILE_DELAY = 1000;                                              /*delay for robot timer*/
+    int MOBILE_INTERVAL = 1000;                                           /*interval for robot timer*/
+    int TURRET_DELAY = 1000;                                              /*delay for robot arm*/
+    int TURRET_INTERVAL = 1000;                                           /*interval for robot arm*/
 
-    private static boolean obs_at_center = false;
+    private static boolean obs_at_center = false;                         /*check if obstacle at center*/
 
     private String TAG = "BCRA";                                          /*tag for log purpose*/
     private Net net = null;                                               /*openCv network*/
@@ -68,38 +68,167 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
             Log.i("BCRA", "OpenCV loaded successfully");
         }
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void get_obs_at_center
+
+    Description:
+        access the boolean obs_at_center
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        obs_at_center, if there are obstacle at center determine by the process frame function
+    */
     public static boolean get_obs_at_center() {
         return obs_at_center;
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void set_turret_device
+
+    Description:
+        bind the BLE device to the a application long variable
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public synchronized static void set_turret_device(BluetoothDevice device){
         mBluetoothTurretDevice = device;
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void set_mobile_device
+
+    Description:
+        bind the BLE device to the a application long variable
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public synchronized static void set_mobile_device(BluetoothDevice device){
         mBluetoothMobileDevice = device;
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void set_mobile_movement
+
+    Description:
+        set the next instruction for the mobile timer to send
+        use as set_mobile_movement(Mobile.HALT);
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public synchronized static void set_mobile_movement(byte i){
         MOBILE_MOVEMENT = i;
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void set_turret_movement
+
+    Description:
+        set the next instruction for the turret timer to send
+        use as set_turret_movement(Turret.HALT);
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public synchronized static void set_turret_movement(byte i){
         TURRET_MOVEMENT = i;
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void start_mobile_timer_task
+
+    Description:
+        start running the timer task for robot
+        will not start running if there is already a existing one
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public synchronized void start_mobile_timer_task(){
         if (mobile_timer != null){
             return;
         }
         mobile_timer = new Timer();
         mobile_timer.scheduleAtFixedRate(new fyp001_mobileHandler(), MOBILE_DELAY, MOBILE_INTERVAL);
-
     }
 
+    /*
+    Public function definitions
+
+    Function Name: void start_turret_timer_task
+
+    Description:
+        start running the timer task for robot arm
+        will not start running if there is already a existing one
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        no return
+    */
     public synchronized void start_turret_timer_task(){
         if (turret_timer != null){
             return;
         }
         turret_timer = new Timer();
-        turret_timer.scheduleAtFixedRate(new fyp001_mobileHandler(), TURRET_DELAY, TURRET_INTERVAL);
+        turret_timer.scheduleAtFixedRate(new fyp001_turretHandler(), TURRET_DELAY, TURRET_INTERVAL);
 
     }
+
     /*
     Public function definitions
 
@@ -121,6 +250,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     public synchronized static void create_new_mobile(BluetoothConnect  bluetoothConnect){
         mobile = new Mobile(bluetoothConnect);
     }
+
     /*
     Public function definitions
 
@@ -142,6 +272,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     public synchronized static void create_new_turret(BluetoothConnect  bluetoothConnect){
         turret = new Turret(bluetoothConnect);
     }
+
     /*
     Public function definitions
 
@@ -162,6 +293,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     public synchronized static Mobile get_mobile(){
         return mobile;
     }
+
     /*
     Public function definitions
 
@@ -186,7 +318,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     /*
     Public function definitions
 
-    Function Name: void loadOpenCVNet
+    Function Name: Boolean loadOpenCVNet
 
     Description:
         load proto and weights for openCV
@@ -199,18 +331,18 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         no export
 
     Return:
-        return turret
+        return true if successful and else false
     */
     public Boolean loadOpenCVNet(){
 
-            String proto = getPath("MobileNetSSD_deploy.prototxt", this);
-            String weights = getPath("MobileNetSSD_deploy.caffemodel", this);
-            if (proto == "" || weights == "") {
-                return false;
-            }
-            net = Dnn.readNetFromCaffe(proto, weights);
-            Log.i(TAG, "Network loaded");
-            return true;
+        String proto = getPath("MobileNetSSD_deploy.prototxt", this);
+        String weights = getPath("MobileNetSSD_deploy.caffemodel", this);
+        if (proto == "" || weights == "") {
+            return false;
+        }
+        net = Dnn.readNetFromCaffe(proto, weights);
+        Log.i(TAG, "Network loaded");
+        return true;
 
     }
 
@@ -280,12 +412,14 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                 int max_y = (int) (detections.get(i,4)[0] * rows);
                 int max_x = (int) (detections.get(i,5)[0] * cols);
                 int min_y = (int)(detections.get(i,6)[0] * rows);
+
+                String label = classNames[classId] + ": "+confidence;
+                /*
                 int left = min_x;
                 int top = max_y;
                 int right = max_x;
                 int bottom = min_y;
-                String label = classNames[classId] + ": "+confidence;
-                /*
+
                 //draw rect around detected obj
                 Imgproc.rectangle(frame,
                         new Point(left,top),
@@ -312,7 +446,6 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         obs_at_center = obs_at_center_local;
         return frame;
     }
-
 
     /*
     Public function definitions
@@ -387,9 +520,27 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     }
 
     public class fyp001_mobileHandler extends TimerTask {
+        /*
+        Public function definitions
+
+        Function Name: void run
+
+        Description:
+            instruct the robot at regular time interval
+
+        Import:
+            no import
+
+        Export:
+            no export
+
+        Return:
+            no return
+        */
         @Override
         public void run(){
             if (mBluetoothMobileDevice != null) {
+                Log.e("Mobile", String.valueOf(MOBILE_MOVEMENT));
                 switch (MOBILE_MOVEMENT){
                     case Mobile.SIDEWAY_UP:
                         mobile.sidewayUp();
@@ -424,9 +575,27 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
     }
 
     public class fyp001_turretHandler extends TimerTask {
+        /*
+        Public function definitions
+
+        Function Name: void run
+
+        Description:
+            instruct the robot arm at regular time interval
+
+        Import:
+            no import
+
+        Export:
+            no export
+
+        Return:
+            no return
+        */
         @Override
         public void run(){
             if (mBluetoothTurretDevice != null) {
+                Log.e("Turret", String.valueOf(TURRET_MOVEMENT));
                 switch(TURRET_MOVEMENT){
                     case Turret.UP:
                         turret.tiltUp();
@@ -451,8 +620,26 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
         }
     }
 
+    /*
+    Public function definitions
+
+    Function Name: String getIPAddress
+                    boolean useIPv4
+
+    Description:
+        function from https://stackoverflow.com/questions/17355365/convert-socket-to-string-and-vice-versa
+        return ipv4 or ipv6 address under request
+
+    Import:
+        useIPv4, boolean, return IPv4 or return Ipv6
+
+    Export:
+        no export
+
+    Return:
+        IP address or empty string if not connected
+    */
     /**
-     * function from https://stackoverflow.com/questions/17355365/convert-socket-to-string-and-vice-versa
      * Get IP address from first non-localhost interface
      * @param useIPv4   true=return ipv4, false=return ipv6
      * @return  address or empty string

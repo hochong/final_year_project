@@ -118,6 +118,7 @@ public class fyp001_MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, BluetoothDevListActivity.class);
         startActivityForResult(intent, REQUEST_BT_GET_DEVICE_MOBILE);
     }
+
     /*
     Public function definitions
 
@@ -144,6 +145,7 @@ public class fyp001_MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, BluetoothDevListActivity.class);
         startActivityForResult(intent, REQUEST_BT_GET_DEVICE_TURRET);
     }
+
     /*
     Public function definitions
 
@@ -173,18 +175,18 @@ public class fyp001_MainActivity extends AppCompatActivity {
             return;
         }
         if (requestCode == REQUEST_BT_GET_DEVICE_MOBILE) {
-             final BluetoothDevice mBluetoothDevice;
-             mBluetoothDevice = resultIntent.getParcelableExtra(BluetoothDevListActivity.EXTRA_KEY_DEVICE);
-             if (mBluetoothDevice == null) {
-                 return;
-             }
-             if (mBluetoothMobileConnect.isConnected()) {
-                 mBluetoothMobileConnect.disconnectBluetooth();
-             }
-             fyp001_BluetoothConnectionRobotApp.set_mobile_device(mBluetoothDevice);
-             mBluetoothMobileConnect.connectBluetooth(mBluetoothDevice);
-             fyp001_BluetoothConnectionRobotApp.create_new_mobile(mBluetoothMobileConnect);
-             Toast.makeText(this, "Mobile connected to " + mBluetoothDevice.getName(), Toast.LENGTH_LONG).show();
+            final BluetoothDevice mBluetoothDevice;
+            mBluetoothDevice = resultIntent.getParcelableExtra(BluetoothDevListActivity.EXTRA_KEY_DEVICE);
+            if (mBluetoothDevice == null) {
+                return;
+            }
+            if (mBluetoothMobileConnect.isConnected()) {
+                mBluetoothMobileConnect.disconnectBluetooth();
+            }
+            fyp001_BluetoothConnectionRobotApp.set_mobile_device(mBluetoothDevice);
+            mBluetoothMobileConnect.connectBluetooth(mBluetoothDevice);
+            fyp001_BluetoothConnectionRobotApp.create_new_mobile(mBluetoothMobileConnect);
+            Toast.makeText(this, "Mobile connected to " + mBluetoothDevice.getName(), Toast.LENGTH_LONG).show();
         } else {
             final BluetoothDevice mBluetoothDevice;
             mBluetoothDevice = resultIntent.getParcelableExtra(BluetoothDevListActivity.EXTRA_KEY_DEVICE);

@@ -4,19 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.mobile;
-import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.turret;
 
 public class fyp001_otherPhonesHandler extends Thread{
     private Socket socket;                              /*thread*/
     private InputStream in;                             /*thread*/
     private byte[] buffer;                              /*thread*/
-    private final byte MOBILE = 0;
-    private final byte TURRET = 1;
+    private final byte MOBILE = 0;                      /*flag to determine the control type*/
+    private final byte TURRET = 1;                      /*flag to determine the control type*/
 
     private fyp001_BluetoothConnectionRobotApp bcra;    /*helper class*/
 
     private int terminate_flag = 0;                      /*terminate flag*/
+
     /*
     Public function definitions
 
@@ -41,6 +40,7 @@ public class fyp001_otherPhonesHandler extends Thread{
         this.socket = socket;
         this.bcra = bcra;
     }
+
     /*
     Public function definitions
 
@@ -62,6 +62,7 @@ public class fyp001_otherPhonesHandler extends Thread{
     public void setterminateflag(int i) {
         this.terminate_flag = i;
     }
+
     /*
     Public function definitions
 

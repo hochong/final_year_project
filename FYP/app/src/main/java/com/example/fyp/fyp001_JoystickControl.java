@@ -13,20 +13,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
@@ -106,6 +103,179 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
         mobile = bcra.get_mobile();
         turret = bcra.get_turret();
 
+        Button turret_home = (Button)findViewById(R.id.button_turret_home);
+        Button turret_up = (Button)findViewById(R.id.button_turret_up);
+        Button turret_down = (Button)findViewById(R.id.button_turret_down);
+        Button turret_left = (Button)findViewById(R.id.button_turret_left);
+        Button turret_right = (Button)findViewById(R.id.button_turret_right);
+
+        turret_home.setOnTouchListener(new View.OnTouchListener() {
+            /*
+            Public function definitions
+
+            Function Name: boolean onTouch
+                            View v
+                            MotionEvent event
+
+            Description:
+                control the home button and the turret, when button is pressed, move the turret back to the default position
+
+            Import:
+                v, View
+                event, MotionEvent, event that tells how the button is touched
+
+            Export:
+                no export
+
+            Return:
+                true
+            */
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    turret_home();
+                }
+                return true;
+            }
+        });
+
+        turret_up.setOnTouchListener(new View.OnTouchListener() {
+            /*
+            Public function definitions
+
+            Function Name: boolean onTouch
+                            View v
+                            MotionEvent event
+
+            Description:
+                control the up button and the turret
+                when button is pressed, turret moves up
+                when button is released, turret stops moving up
+
+            Import:
+                v, View
+                event, MotionEvent, event that tells how the button is touched
+
+            Export:
+                no export
+
+            Return:
+                true
+            */
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    turret_up();
+                }else if (event.getAction() == MotionEvent.ACTION_UP){
+                    turret_halt();
+                }
+                return true;
+            }
+        });
+
+        turret_down.setOnTouchListener(new View.OnTouchListener() {
+            /*
+            Public function definitions
+
+            Function Name: boolean onTouch
+                            View v
+                            MotionEvent event
+
+            Description:
+                control the down button and the turret
+                when button is pressed, turret moves down
+                when button is released, turret stops moving down
+
+            Import:
+                v, View
+                event, MotionEvent, event that tells how the button is touched
+
+            Export:
+                no export
+
+            Return:
+                true
+            */
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    turret_down();
+                }else if (event.getAction() == MotionEvent.ACTION_UP){
+                    turret_halt();
+                }
+                return true;
+            }
+        });
+
+        turret_left.setOnTouchListener(new View.OnTouchListener() {
+            /*
+            Public function definitions
+
+            Function Name: boolean onTouch
+                            View v
+                            MotionEvent event
+
+            Description:
+                control the left button and the turret
+                when button is pressed, turret moves left
+                when button is released, turret stops moving left
+
+            Import:
+                v, View
+                event, MotionEvent, event that tells how the button is touched
+
+            Export:
+                no export
+
+            Return:
+                true
+            */
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    turret_left();
+                }else if (event.getAction() == MotionEvent.ACTION_UP){
+                    turret_halt();
+                }
+                return true;
+            }
+        });
+
+        turret_right.setOnTouchListener(new View.OnTouchListener() {
+            /*
+            Public function definitions
+
+            Function Name: boolean onTouch
+                            View v
+                            MotionEvent event
+
+            Description:
+                control the right button and the turret
+                when button is pressed, turret moves right
+                when button is released, turret stops moving right
+
+            Import:
+                v, View
+                event, MotionEvent, event that tells how the button is touched
+
+            Export:
+                no export
+
+            Return:
+                true
+            */
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    turret_right();
+                }else if (event.getAction() == MotionEvent.ACTION_UP){
+                    turret_halt();
+                }
+                return true;
+            }
+        });
+
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
             /*
@@ -121,7 +291,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
                 direct the robot to move in the corresponding position
 
             Import:
-                angle, int, intger that determine the polar coordinate of the joystick
+                angle, int, integer that determine the polar coordinate of the joystick
                 strength, int, integer that determine the polar coordinate of the joystick
 
             Export:
@@ -131,49 +301,47 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
                 no return
             */
             @Override
-            //TODO implement actual moving through bluetooth connection
             public void onMove(int angle, int strength) {
 
                 //move forwards 90+-20 activate over 70%
                 if (angle > 70 && angle <= 110 && strength > 70){
-                    Log.i("MainActivity", "move forward");
+                    //Log.i("MainActivity", "move forward");
                     bcra.set_mobile_movement(Mobile.SIDEWAY_UP);
                 }
                 //move left 180+-20 activate over 70%
-                if (angle > 160 && angle <= 200 && strength > 70){
-                    Log.i("MainActivity", "move left");
-                    bcra.set_mobile_movement(Mobile.SIDEWAY_LEFT);
-                }
-                //move right 0+-20 activate over 70%
-                if ((angle > 340 || angle <= 20) && strength > 70){
-                    Log.i("MainActivity", "move right");
+                else if (angle > 160 && angle <= 200 && strength > 70){
+                    //Log.i("MainActivity", "move left");
                     bcra.set_mobile_movement(Mobile.SIDEWAY_RIGHT);
                 }
+                //move right 0+-20 activate over 70%
+                else if ((angle > 340 || angle <= 20) && strength > 70){
+                    //Log.i("MainActivity", "move right");
+                    bcra.set_mobile_movement(Mobile.SIDEWAY_LEFT);
+                }
                 //move backwards 270+-20 activate over 70%
-                if (angle > 250 && angle <= 290 && strength > 70){
-                    Log.i("MainActivity", "move backward");
+                else if (angle > 250 && angle <= 290 && strength > 70){
+                    //Log.i("MainActivity", "move backward");
                     bcra.set_mobile_movement(Mobile.SIDEWAY_DOWN);
                 }
-                if (angle > 120 && angle <= 160 && strength > 70){
-                    Log.i("MainActivity", "move up + left");
-                    bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
-                }
-                if (angle > 20 && angle <= 70 && strength > 70){
-                    Log.i("MainActivity", "move up + right");
+                else if (angle > 120 && angle <= 160 && strength > 70){
+                    //Log.i("MainActivity", "move up + left");
                     bcra.set_mobile_movement(Mobile.DIAG_UP_RIGHT);
                 }
-                if (angle > 200 && angle <= 250 && strength > 70){
-                    Log.i("MainActivity", "move down + left");
-                    bcra.set_mobile_movement(Mobile.DIAG_DOWN_LEFT);
-                }
-                if (angle > 290 && angle <= 340 && strength > 70){
-                    Log.i("MainActivity", "move down + right");
+                else if (angle > 20 && angle <= 70 && strength > 70){
+                    //Log.i("MainActivity", "move up + right");
                     bcra.set_mobile_movement(Mobile.DIAG_DOWN_RIGHT);
                 }
+                else if (angle > 200 && angle <= 250 && strength > 70){
+                    //Log.i("MainActivity", "move down + left");
+                    bcra.set_mobile_movement(Mobile.DIAG_UP_LEFT);
+                }
+                else if (angle > 290 && angle <= 340 && strength > 70){
+                    //Log.i("MainActivity", "move down + right");
+                    bcra.set_mobile_movement(Mobile.DIAG_DOWN_LEFT);
+                }
                 else{
-                    Log.i("MainActivity", "halt");
+                    //Log.i("MainActivity", "halt");
                     bcra.set_mobile_movement(Mobile.HALT);
-                    bcra.set_turret_movement(Turret.HALT);
                 }
                 if (bcra.get_obs_at_center()){
                     Toast.makeText(fyp001_JoystickControl.this,"Obstacle(s) detected at the front of the camera",Toast.LENGTH_SHORT).show();
@@ -181,6 +349,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
 
             }
         });
+
         //openCV camera
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.joystick_cameraView);
         mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
@@ -190,22 +359,179 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             mOpenCvCameraView.enableView();
             Log.i(TAG,"Camera Start!");
         }
+
+        bcra.start_mobile_timer_task();
+        bcra.start_turret_timer_task();
     }
-    public void turret_home(View view){
+
+    /*
+    Public function definitions
+
+    Function Name: void turret_home
+
+    Description:
+       ask turret to go back to home position
+       public function for listeners to access bcra class function
+       listener do not have to get util class, only need to call this public function
+       from :
+       bcra = getApplication();
+       bcra.set_turret_movement(Turret.HOME);
+       to :
+       turret_home();
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        true
+    */
+    public void turret_home(){
         bcra.set_turret_movement(Turret.HOME);
     }
-    public void turret_up(View view){
+
+    /*
+    Public function definitions
+
+    Function Name: void turret_up
+
+    Description:
+       ask turret to go up
+       public function for listeners to access bcra class function
+       listener do not have to get util class, only need to call this public function
+       from :
+       bcra = getApplication();
+       bcra.set_turret_movement(Turret.UP);
+       to :
+       turret_up();
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        true
+    */
+    public void turret_up(){
         bcra.set_turret_movement(Turret.UP);
     }
-    public void turret_down(View view){
+
+    /*
+    Public function definitions
+
+    Function Name: void turret_down
+
+    Description:
+       ask turret to go down
+       public function for listeners to access bcra class function
+       listener do not have to get util class, only need to call this public function
+       from :
+       bcra = getApplication();
+       bcra.set_turret_movement(Turret.DOWN);
+       to :
+       turret_down();
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        true
+    */
+    public void turret_down(){
         bcra.set_turret_movement(Turret.DOWN);
     }
-    public void turret_left(View view){
+
+    /*
+    Public function definitions
+
+    Function Name: void turret_left
+
+    Description:
+       ask turret to rotate left
+       public function for listeners to access bcra class function
+       listener do not have to get util class, only need to call this public function
+       from :
+       bcra = getApplication();
+       bcra.set_turret_movement(Turret.LEFT);
+       to :
+       turret_left();
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        true
+    */
+    public void turret_left(){
         bcra.set_turret_movement(Turret.LEFT);
     }
-    public void turret_right(View view){
+
+    /*
+    Public function definitions
+
+    Function Name: void turret_right
+
+    Description:
+       ask turret to rotate right
+       public function for listeners to access bcra class function
+       listener do not have to get util class, only need to call this public function
+       from :
+       bcra = getApplication();
+       bcra.set_turret_movement(Turret.RIGHT);
+       to :
+       turret_right();
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        true
+    */
+    public void turret_right(){
         bcra.set_turret_movement(Turret.RIGHT);
     }
+
+    /*
+    Public function definitions
+
+    Function Name: void turret_halt
+
+    Description:
+       ask turret to stop the current rotation
+       public function for listeners to access bcra class function
+       listener do not have to get util class, only need to call this public function
+       from :
+       bcra = getApplication();
+       bcra.set_turret_movement(Turret.HALT);
+       to :
+       turret_halt();
+
+    Import:
+        no import
+
+    Export:
+        no export
+
+    Return:
+        true
+    */
+    public void turret_halt() {
+        bcra.set_turret_movement(Turret.HALT);
+    }
+
     /*
     Public function definitions
 
@@ -225,7 +551,6 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
         no return
     */
     public void connectToOtherPhones(View view) {
-
         String address = bcra.getIPAddress(true);
         try {
             listener = new ServerSocket(PORT);
@@ -255,6 +580,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
 
 
     }
+
     /*
     Public function definitions
 
@@ -273,7 +599,6 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     Return:
         no return
     */
-
     public void toVoiceControl(View view) {
         if (mOpenCvCameraView != null){
             mOpenCvCameraView.disableView();
@@ -281,6 +606,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
         Intent i = new Intent(this, fyp001_VoiceControl.class);
         startActivity(i);
     }
+
     /*
     Public function definitions
 
@@ -308,6 +634,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
             e.printStackTrace();
         }
     }
+
     /*
     Public function definitions
 
@@ -331,6 +658,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     public void onCameraViewStarted(int width, int height) {
         Log.i(TAG,"openCV joystick camera started!");
     }
+
     /*
     Public function definitions
 
@@ -352,6 +680,7 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     public void onCameraViewStopped() {
         /*empty body*/
     }
+
     /*
     Public function definitions
 
