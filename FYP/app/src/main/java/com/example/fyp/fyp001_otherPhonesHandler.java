@@ -1,20 +1,28 @@
 package com.example.fyp;
 
+import android.os.HandlerThread;
+import android.os.StrictMode;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 
-public class fyp001_otherPhonesHandler extends Thread{
-    private Socket socket;                              /*thread*/
+public class fyp001_otherPhonesHandler extends Thread {
+    private ServerSocket socket;                        /*thread*/
     private InputStream in;                             /*thread*/
-    private byte[] buffer;                              /*thread*/
+
     private final byte MOBILE = 0;                      /*flag to determine the control type*/
     private final byte TURRET = 1;                      /*flag to determine the control type*/
 
     private fyp001_BluetoothConnectionRobotApp bcra;    /*helper class*/
 
-    private int terminate_flag = 0;                      /*terminate flag*/
+    private int terminate_flag = 0;                     /*terminate flag*/
+    private Socket s;                                   /*thread*/
+    private int port;                                   /*thread*/
+    private HandlerThread ht;                           /*thread*/
 
     /*
     Public function definitions
@@ -36,40 +44,76 @@ public class fyp001_otherPhonesHandler extends Thread{
     Return:
         no return value
      */
-    public fyp001_otherPhonesHandler(Socket socket, fyp001_BluetoothConnectionRobotApp bcra) {
-        this.socket = socket;
+    public fyp001_otherPhonesHandler(int p, final fyp001_BluetoothConnectionRobotApp bcra) {
+
+        this.port = p;
         this.bcra = bcra;
+
+        ht = new HandlerThread("otherPhoneHandler"){
+            private byte[] buffer = {0, 0, 0, 0};                              /*1, byte_mobile_or_turret, byte_instruction, 1*/
+            /*
+            Public function definitions
+
+            Function Name: void run
+
+            Description:
+                accept the byte coming from client and communicate with the mobile/turret
+
+            Import:
+
+            Export:
+                no export
+
+            Return:
+                no return value
+             */
+            public void run() {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+                StrictMode.setThreadPolicy(policy);
+                try {
+                    socket = new ServerSocket(port);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try{
+                    s = socket.accept();
+                    in = s.getInputStream();
+                    while (in != null) {
+                        if (terminate_flag == 1){
+                            interrupt();
+                        }
+                        in.read(buffer, 0 , buffer.length);
+                        Log.e("otherphoneMsg", "msg: "+buffer[1]+ buffer[2]);
+                        if (buffer != null){
+                            switch(buffer[1]){
+                                case MOBILE:
+                                    bcra.set_mobile_movement(buffer[2]);
+                                    break;
+                                case TURRET:
+                                    bcra.set_turret_movement(buffer[2]);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        ht.start();
     }
-
-    /*
-    Public function definitions
-
-    Function Name: void setterminateflag
-                        int i
-
-    Description:
-        set the terminate flag for the thread to check and terminate automatically
-
-    Import:
-        i, int, integer 1 = terminate other = alive
-
-    Export:
-        no export
-
-    Return:
-        no return value
-     */
-    public void setterminateflag(int i) {
-        this.terminate_flag = i;
-    }
-
     /*
     Public function definitions
 
     Function Name: void run
 
     Description:
-        accept the byte coming from client and communicate with the mobile/turret
+        close the thread when terminate
 
     Import:
 
@@ -79,27 +123,8 @@ public class fyp001_otherPhonesHandler extends Thread{
     Return:
         no return value
      */
-    public void run() {
-        try{
-            in = socket.getInputStream();
-            while (true) {
-                if (this.terminate_flag == 1){
-                    interrupt();
-                }
-                in.read(buffer);
-                switch(buffer[0]){
-                    case MOBILE:
-                        bcra.set_mobile_movement(buffer[1]);
-                        break;
-                    case TURRET:
-                        bcra.set_turret_movement(buffer[1]);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void closethread(){
+        ht.quitSafely();
     }
+
 }

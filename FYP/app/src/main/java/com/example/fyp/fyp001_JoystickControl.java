@@ -1,6 +1,5 @@
 package com.example.fyp;
 
-import android.bluetooth.BluetoothGatt;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -21,10 +20,6 @@ import android.widget.Toast;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 import static com.example.fyp.fyp001_BluetoothConnectionRobotApp.mobile;
@@ -38,10 +33,11 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     private fyp001_BluetoothConnectionRobotApp bcra;                /*helper class*/
 
     private static final int PORT = 9020;                           /*socket*/
-    private ServerSocket listener;                                  /*socket*/
+    private fyp001_otherPhonesHandler listener;                                  /*socket*/
+
 
     /*
-    Public function definitions
+    Protected function definitions
 
     Function Name: void onCreate
                     Bundle savedInstanceState
@@ -551,33 +547,14 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
         no return
     */
     public void connectToOtherPhones(View view) {
+
         String address = bcra.getIPAddress(true);
-        try {
-            listener = new ServerSocket(PORT);
-            //button showing ip and port
-            Button b = findViewById(R.id.connect_to_other_phone_button);
-            b.setClickable(false);
-            b.setText(address + ":" + Integer.toString(PORT));
-            Log.e(TAG, "server address: "+ address + ":"+PORT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try{
-            Socket s = listener.accept();
-            //start thread
-            new fyp001_otherPhonesHandler(s, bcra).start();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                listener.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
+        //button showing ip and port
+        Button b = findViewById(R.id.connect_to_other_phone_button);
+        b.setClickable(false);
+        b.setText(address + ":" + Integer.toString(PORT));
+        Log.e(TAG, "server address: "+ address + ":"+PORT);
+        listener = new fyp001_otherPhonesHandler(PORT, bcra);
 
     }
 
@@ -628,11 +605,8 @@ public class fyp001_JoystickControl extends AppCompatActivity implements CameraB
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        try {
-            listener.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        listener.closethread();
+
     }
 
     /*

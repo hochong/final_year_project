@@ -21,27 +21,7 @@ public class fyp001_MainActivity extends AppCompatActivity {
     static public final int REQUEST_BT_GET_DEVICE_TURRET = 0;       /*turret flag*/
 
     /*
-    Public function definitions
-
-    Function Name: void fyp001_MainActivity
-
-    Description:
-        Constructor of the class
-
-    Import:
-        no import
-
-    Export:
-        no export
-
-    Return:
-        no return value
-     */
-    public fyp001_MainActivity() {
-        /*empty body*/
-    }
-    /*
-    Public function definitions
+    Protected function definitions
 
     Function Name: void onCreate
                     Bundle savedInstanceState

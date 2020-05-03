@@ -414,25 +414,6 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                 int min_y = (int)(detections.get(i,6)[0] * rows);
 
                 String label = classNames[classId] + ": "+confidence;
-                /*
-                int left = min_x;
-                int top = max_y;
-                int right = max_x;
-                int bottom = min_y;
-
-                //draw rect around detected obj
-                Imgproc.rectangle(frame,
-                        new Point(left,top),
-                        new Point(right,bottom),
-                        new Scalar(0,255,0));
-                int[] baseLine = new int[1];
-                Size labelSize = Imgproc.getTextSize(label, Core.FONT_HERSHEY_SIMPLEX,0.5,1,baseLine);
-
-                //draw background for label
-                Imgproc.rectangle(frame, new Point(left, top - labelSize.height), new Point(left + labelSize.width, top+baseLine[0]),new Scalar(255,255,255), 1);
-                //write class name and conf
-                Imgproc.putText(frame,label, new Point(left,top), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0,0,0));
-                */
                 //output log
                 Log.i(TAG,"Obj found! with conf: " + confidence + " item is: " + label+"x x y y: " + min_x +" "+ max_x +" "+ min_y +" "+ max_y);
                 //if collide and conf > 0.6, assume obstacle at center
@@ -652,7 +633,6 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                 for (InetAddress addr : addrs) {
                     if (!addr.isLoopbackAddress()) {
                         String sAddr = addr.getHostAddress();
-                        //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
                         boolean isIPv4 = sAddr.indexOf(':')<0;
 
                         if (useIPv4) {
@@ -667,7 +647,7 @@ public class fyp001_BluetoothConnectionRobotApp extends Application {
                     }
                 }
             }
-        } catch (Exception ignored) { } // for now eat exceptions
+        } catch (Exception ignored) { }
         return "";
     }
 }
